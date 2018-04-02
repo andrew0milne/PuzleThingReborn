@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 114865884611934992}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -409,7 +409,7 @@ GameObject:
   - component: {fileID: 114397508449347504}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -428,7 +428,7 @@ GameObject:
   - component: {fileID: 114312060999606866}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -553,7 +553,7 @@ GameObject:
   - component: {fileID: 114090886525322744}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -640,7 +640,7 @@ GameObject:
   - component: {fileID: 114193903268219144}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -778,7 +778,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!1 &1754557813270512
 GameObject:
@@ -794,7 +794,7 @@ GameObject:
   - component: {fileID: 114377685315244050}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -927,7 +927,7 @@ GameObject:
   - component: {fileID: 114667870861536260}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -946,7 +946,7 @@ GameObject:
   - component: {fileID: 114130247491356400}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -965,7 +965,7 @@ GameObject:
   - component: {fileID: 114986240643523920}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1032,7 +1032,7 @@ GameObject:
   - component: {fileID: 114747175854367452}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1101,7 +1101,7 @@ GameObject:
   - component: {fileID: 114778310015153118}
   m_Layer: 8
   m_Name: Button
-  m_TagString: Button
+  m_TagString: MovingObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1468,8 +1468,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1547583831205652}
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -3.77, y: 0.29, z: -4.893}
+  m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 5.79536, y: -6.8149195, z: -4.535929}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4941465278255112}
@@ -3137,6 +3137,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3216,6 +3217,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3303,6 +3305,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3415,6 +3418,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3522,6 +3526,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3564,6 +3569,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3797,6 +3803,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3850,6 +3857,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -3925,6 +3933,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -4020,6 +4029,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0
@@ -4165,6 +4175,7 @@ MonoBehaviour:
   targets: []
   speed: 10
   wait_time: 0
+  start_wait_time: 0
   goes_back: 1
   one_time_move: 0
   is_active: 0

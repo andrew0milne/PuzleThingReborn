@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
 
             if (Physics.Raycast(ray.origin, ray.direction, out hit, 5.0f))
             {
-                if (hit.collider.gameObject.tag == "Button")
+                if (hit.collider.gameObject.tag == "MovingObject")
                 {
                     HUDText.text = "LMB to press";
                     if (Input.GetMouseButtonDown(0))
