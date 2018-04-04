@@ -45,9 +45,6 @@ public class MovingObject : MonoBehaviour
 		
 	public IEnumerator Move()
 	{
-		//yield return new WaitForSeconds (start_wait_time);
-
-
 		float t = 0;
 
 		while (t <= 1.1f) 
@@ -66,7 +63,23 @@ public class MovingObject : MonoBehaviour
 
 		if (goes_back) 
 		{
-			StartCoroutine (MoveBack ());
+			t = 1.0f;
+
+			yield return new WaitForSeconds (wait_time);
+
+			while (t >= -0.1f) 
+			{
+				if (moving_parent != null) 
+				{
+					transform.position = Vector3.Lerp (start_pos + moving_parent.position - parent_start_location, end_pos + moving_parent.position - parent_start_location, t);
+				} 
+				else 
+				{
+					transform.position = Vector3.Lerp (start_pos, end_pos, t);
+				}
+				t -= Time.deltaTime * speed;
+				yield return null;
+			}
 		}
 
 		if (!one_time_move) 
@@ -77,32 +90,9 @@ public class MovingObject : MonoBehaviour
 		yield return null;
 	}
 
-	public IEnumerator MoveBack()
-	{
-		yield return new WaitForSeconds (wait_time);
-
-		float t = 1.0f;
-
-		while (t >= -0.1f) 
-		{
-			if (moving_parent != null) 
-			{
-				transform.position = Vector3.Lerp (start_pos + moving_parent.position - parent_start_location, end_pos + moving_parent.position - parent_start_location, t);
-			} 
-			else 
-			{
-				transform.position = Vector3.Lerp (start_pos, end_pos, t);
-			}
-			t -= Time.deltaTime * speed;
-			yield return null;
-		}
-
-		yield return null;
-	}
-
 	void Deactivate()
 	{
-		StartCoroutine (MoveBack ());
+		//StartCoroutine (MoveBack ());
 	}
 
 	protected virtual void Activate()
@@ -110,6 +100,7 @@ public class MovingObject : MonoBehaviour
 		if(!is_active)
 		{
 			is_active = true;
+
 			StartCoroutine (Move ());
 			foreach (Transform t in targets) 
 			{

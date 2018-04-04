@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
 	public Canvas canvas;
     public Text HUDText;
 
+	public GameObject beam_gun;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -72,6 +74,17 @@ public class PlayerController : MonoBehaviour
                 HUDText.text = "";
 
             }
+
+			if (Input.GetMouseButtonDown(1))
+			{
+				beam_gun.SendMessage("Activate");
+			}
+			else if (Input.GetMouseButtonUp(1))
+			{
+				beam_gun.SendMessage("Deactivate");
+			}
+
+
             // Camera Rotation
             float rotLeftRight = Input.GetAxis ("Mouse X") * mouseSensitivity;
 			transform.Rotate (0, rotLeftRight, 0);

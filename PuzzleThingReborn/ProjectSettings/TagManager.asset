@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Button
   - MovingObject
+  - BeamTarget
   layers:
   - Default
   - TransparentFX
