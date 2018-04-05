@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent (typeof(LineRenderer))]
 public class BeamGun : MonoBehaviour 
 {
-	// VECTOR PS
-
 	public GameObject beam_target_parent;
 	public GameObject[] beam_targets;
 
@@ -20,6 +18,11 @@ public class BeamGun : MonoBehaviour
 
 	public int max_line_points = 30;
 	int bullet_total = 0;
+
+	public bool use_perlin = true;
+	public float perlin_scale = 1.0f;
+	float perlin_y = 0.0f;
+	public float perlin_speed = 1.0f;
 
 	bool active = false;
 
@@ -73,14 +76,6 @@ public class BeamGun : MonoBehaviour
 		for (int i = 0; i < 3; i++) 
 		{
 			beam_points[i] = Vector3.Lerp (begin_pos.position, start_pos.position, t);
-//			if (i > 0) 
-//			{
-//				if (CheckRay (beam_points[i - 1],beam_points[i])) 
-//				{
-//					active = false;
-//					break;
-//				}
-//			}
 			t += 1.0f / 3.0f;
 		}
 
@@ -92,11 +87,6 @@ public class BeamGun : MonoBehaviour
 				Vector3.Lerp (
 					Vector3.Lerp (start_pos.position, mid_pos.position, t), 
 					Vector3.Lerp (mid_pos.position, current_target.position, t), t);
-//			if (CheckRay (beam_points[i - 1],beam_points[i])) 
-//			{
-//				active = false;
-//				break;
-//			}
 
 			t += 1.0f / (max_line_points - 3);
 		}
@@ -104,17 +94,41 @@ public class BeamGun : MonoBehaviour
 		return beam_points;
 	}
 
+	// Could also use a combnations of various sin/cos waves
+	// or pass audio data in, so it the musics sound wave, would be cool
+
+	Vector3[] PerlinBeam(Vector3[] beam)
+	{
+		for(int i = 0; i < max_line_points; i++)
+		{
+			beam [i].x += (Mathf.PerlinNoise (i*0.08f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI) * perlin_scale;
+			beam [i].y += (Mathf.PerlinNoise (i*0.02f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI)* perlin_scale;
+			beam [i].z += (Mathf.PerlinNoise (i*0.03f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI)* perlin_scale;
+		}
+
+		return beam;
+	}
+
 	IEnumerator Shoot()
 	{
+		Vector3[] temp_beam;
+
 		while (active) 
 		{
-			if (CheckBeamCollision (GetBeam()))
+
+			temp_beam = GetBeam ();
+			if (CheckBeamCollision (temp_beam))
 			{
 				active = false;
 				break;
 			}
 
-			beam.SetPositions(GetBeam ());
+			if (use_perlin) 
+			{
+				temp_beam = PerlinBeam (temp_beam);
+			}
+
+			beam.SetPositions(temp_beam);
 
 			yield return new WaitForSeconds (speed);
 		}
@@ -193,6 +207,6 @@ public class BeamGun : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		
+		perlin_y += Time.deltaTime * perlin_speed;
 	}
 }
