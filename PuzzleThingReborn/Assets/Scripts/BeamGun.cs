@@ -8,9 +8,10 @@ public class BeamGun : MonoBehaviour
 	public GameObject beam_target_parent;
 	public GameObject[] beam_targets;
 
-	Transform current_target;
+	public GameObject front_section;
+	public float spin_speed = 1.0f;
 
-	public GameObject bullet_prefab;
+	Transform current_target;
 
 	public Transform begin_pos, start_pos, mid_pos, end_pos;
 
@@ -24,7 +25,13 @@ public class BeamGun : MonoBehaviour
 	float perlin_y = 0.0f;
 	public float perlin_speed = 1.0f;
 
+	public float perlin_seed = 0.0f;
+
 	bool active = false;
+
+	public GameObject spark_particle;
+	List<GameObject>  particle_list;
+	List<GameObject> kill_list;
 
 	LineRenderer beam;
 
@@ -33,8 +40,10 @@ public class BeamGun : MonoBehaviour
 	{
 		beam = GetComponent<LineRenderer> ();
 		beam.positionCount = max_line_points;
-
 		beam_targets =  GameObject.FindGameObjectsWithTag ("BeamTarget"); //beam_target_parent.GetComponentsInChildren<Transform> ();
+
+		particle_list = new List<GameObject>();
+		kill_list = new List<GameObject>();
 	}
 
 	bool CheckRay(Vector3 pos_1, Vector3 pos_2)
@@ -101,12 +110,43 @@ public class BeamGun : MonoBehaviour
 	{
 		for(int i = 0; i < max_line_points; i++)
 		{
-			beam [i].x += (Mathf.PerlinNoise (i*0.08f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI) * perlin_scale;
-			beam [i].y += (Mathf.PerlinNoise (i*0.02f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI)* perlin_scale;
-			beam [i].z += (Mathf.PerlinNoise (i*0.03f, perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI)* perlin_scale;
+			beam [i].x += (Mathf.PerlinNoise (i*0.08f, perlin_seed + perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI) * perlin_scale;
+			beam [i].y += (Mathf.PerlinNoise (i*0.02f, perlin_seed + perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI) * perlin_scale;
+			beam [i].z += (Mathf.PerlinNoise (i*0.03f, perlin_seed + perlin_y)-0.5f) * Mathf.Sin(((float)i/max_line_points)*Mathf.PI) * perlin_scale;
 		}
 
 		return beam;
+	}
+
+	void SpawnParticles()
+	{
+		for (int i = 0; i < max_line_points; i++) 
+		{
+			if (Random.Range (0, 100) == 1) 
+			{
+				GameObject temp = Instantiate (spark_particle, beam.GetPosition (i), Quaternion.identity, transform);
+				//particle_list.Add (temp);
+			}
+		}
+
+//		kill_list.Clear ();
+//
+//		foreach (GameObject p in particle_list) 
+//		{
+//			Debug.Log (p.GetComponent<ParticleSystem> ().particleCount);
+//			if (p.GetComponent<ParticleSystem> ().particleCount <= 0) 
+//			{
+//				Debug.Log ("KILL");
+//				kill_list.Add (p);
+//				//Destroy (p);
+//			}
+//		}
+//
+//		foreach (GameObject p in kill_list) 
+//		{
+//			particle_list.Remove (p);
+//			//Destroy (p);
+//		}
 	}
 
 	IEnumerator Shoot()
@@ -115,6 +155,8 @@ public class BeamGun : MonoBehaviour
 
 		while (active) 
 		{
+
+			front_section.transform.RotateAround (front_section.transform.position, front_section.transform.up, spin_speed * Time.deltaTime);
 
 			temp_beam = GetBeam ();
 			if (CheckBeamCollision (temp_beam))
@@ -129,6 +171,8 @@ public class BeamGun : MonoBehaviour
 			}
 
 			beam.SetPositions(temp_beam);
+
+			SpawnParticles ();
 
 			yield return new WaitForSeconds (speed);
 		}
