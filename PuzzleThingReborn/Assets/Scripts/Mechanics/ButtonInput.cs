@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ButtonInput : MovingObject 
 {
 
-	public GameObject keypad;
+	public GameObject input_target;
 	public int input_num;
 
 	public Text text;
@@ -35,7 +35,7 @@ public class ButtonInput : MovingObject
 		{
 			base.Activate ();
 			is_active = true;
-			keypad.SendMessage ("ButtonPressed", input_num);
+			input_target.SendMessage ("ButtonPressed", input_num);
 		}
 	}
 }

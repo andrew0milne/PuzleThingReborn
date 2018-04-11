@@ -27,8 +27,15 @@ public class MovingObject : MonoBehaviour
 	{
 		start_pos = transform.position;
 
-		end_pos = end_pos_obj.position;
-		end_pos_obj.gameObject.SetActive (false);
+		if (end_pos_obj != null) 
+		{
+			end_pos = end_pos_obj.position;
+			end_pos_obj.gameObject.SetActive (false);
+		} 
+		else 
+		{
+			end_pos = transform.position;
+		}
 
 		parents = GetComponentsInParent<Transform> ();
 
@@ -42,7 +49,17 @@ public class MovingObject : MonoBehaviour
 			}
 		}
 	}
-		
+
+	void UpdateEndPos(Vector3 new_end_pos)
+	{
+		end_pos = new_end_pos;
+	}
+
+	void UpdateStartPos(Vector3 new_start_pos)
+	{
+		start_pos = new_start_pos;
+	}
+
 	public IEnumerator Move()
 	{
 		float t = 0;
