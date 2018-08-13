@@ -8,7 +8,10 @@ public class BeamGun : MonoBehaviour
 	public GameObject beam_target_parent;
 	public GameObject[] beam_targets;
 
-	public GameObject front_section;
+    ParticleSystem ps;
+    ParticleSystem.Particle[] particles;
+
+    public GameObject front_section;
 	public float spin_speed = 1.0f;
 
 	Transform current_target;
@@ -30,7 +33,9 @@ public class BeamGun : MonoBehaviour
 	bool active = false;
 
 	public GameObject spark_particle;
-	List<GameObject>  particle_list;
+    public GameObject spark_gun_particle;
+
+    List<GameObject>  particle_list;
 	List<GameObject> kill_list;
 
 	LineRenderer beam;
@@ -42,7 +47,11 @@ public class BeamGun : MonoBehaviour
 		beam.positionCount = max_line_points;
 		beam_targets =  GameObject.FindGameObjectsWithTag ("BeamTarget"); //beam_target_parent.GetComponentsInChildren<Transform> ();
 
-		particle_list = new List<GameObject>();
+        ps = GetComponent<ParticleSystem>();
+        particles = new ParticleSystem.Particle[1]; ps = GetComponent<ParticleSystem>();
+        particles = new ParticleSystem.Particle[1];
+
+        particle_list = new List<GameObject>();
 		kill_list = new List<GameObject>();
 	}
 
@@ -118,42 +127,32 @@ public class BeamGun : MonoBehaviour
 		return beam;
 	}
 
-	void SpawnParticles()
+	void SpawnParticles(Vector3 pos)
 	{
-		for (int i = 0; i < max_line_points; i++) 
-		{
-			if (Random.Range (0, 100) == 1) 
-			{
-				GameObject temp = Instantiate (spark_particle, beam.GetPosition (i), Quaternion.identity, transform);
-				//particle_list.Add (temp);
-			}
-		}
+        spark_particle.transform.position = pos;
 
-//		kill_list.Clear ();
-//
-//		foreach (GameObject p in particle_list) 
-//		{
-//			Debug.Log (p.GetComponent<ParticleSystem> ().particleCount);
-//			if (p.GetComponent<ParticleSystem> ().particleCount <= 0) 
-//			{
-//				Debug.Log ("KILL");
-//				kill_list.Add (p);
-//				//Destroy (p);
-//			}
-//		}
-//
-//		foreach (GameObject p in kill_list) 
-//		{
-//			particle_list.Remove (p);
-//			//Destroy (p);
-//		}
-	}
+        //ps
+
+        //if (ps.isPlaying == false)
+        //{
+        //    ps.Emit(1);
+        //    ps.GetParticles(particles);
+
+        //    particles[0].position = pos;
+
+        //    ps.SetParticles(particles, 1);
+
+        //    ps.Play();
+        //}
+    }
 
 	IEnumerator Shoot()
 	{
 		Vector3[] temp_beam;
+        spark_particle.GetComponent<ParticleSystem>().Play();
+        spark_gun_particle.GetComponent<ParticleSystem>().Play();
 
-		while (active) 
+        while (active) 
 		{
 
 			front_section.transform.RotateAround (front_section.transform.position, front_section.transform.up, spin_speed * Time.deltaTime);
@@ -172,12 +171,14 @@ public class BeamGun : MonoBehaviour
 
 			beam.SetPositions(temp_beam);
 
-			SpawnParticles ();
+			SpawnParticles (temp_beam[(int)Random.Range(0, temp_beam.Length-1)]);
 
 			yield return new WaitForSeconds (speed);
 		}
 
-		Deactivate ();
+        spark_particle.GetComponent<ParticleSystem>().Stop();
+        spark_gun_particle.GetComponent<ParticleSystem>().Stop();
+        Deactivate ();
 
 		yield return null;
 	}
