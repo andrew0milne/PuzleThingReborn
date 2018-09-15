@@ -53,6 +53,7 @@ public class BeamGun : MonoBehaviour
 
         particle_list = new List<GameObject>();
 		kill_list = new List<GameObject>();
+
 	}
 
 	bool CheckRay(Vector3 pos_1, Vector3 pos_2)
