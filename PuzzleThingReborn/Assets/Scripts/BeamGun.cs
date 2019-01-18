@@ -131,20 +131,6 @@ public class BeamGun : MonoBehaviour
 	void SpawnParticles(Vector3 pos)
 	{
         spark_particle.transform.position = pos;
-
-        //ps
-
-        //if (ps.isPlaying == false)
-        //{
-        //    ps.Emit(1);
-        //    ps.GetParticles(particles);
-
-        //    particles[0].position = pos;
-
-        //    ps.SetParticles(particles, 1);
-
-        //    ps.Play();
-        //}
     }
 
 	IEnumerator Shoot()

@@ -46,12 +46,15 @@ public class PlayerController : MonoBehaviour
             {
                 if (hit.collider.gameObject.tag == "MovingObject")
                 {
-                    HUDText.text = "LMB to press";
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        hit.collider.gameObject.SendMessage("Activate");
-                    }
+                    if (hit.collider.gameObject.GetComponent<MovingObject>().clickable == true)
+                    { 
+                        HUDText.text = "LMB to press";
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            hit.collider.gameObject.SendMessage("Activate");
 
+                        }
+                    }
 
                 }
                 else if (hit.collider.gameObject.tag == "PuzzleReset")

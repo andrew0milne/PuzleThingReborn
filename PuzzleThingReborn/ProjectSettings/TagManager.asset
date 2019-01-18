@@ -7,6 +7,12 @@ TagManager:
   - Button
   - MovingObject
   - BeamTarget
+  - Route
+  - EnemyParent
+  - Enemy
+  - MusicObject
+  - MusicController
+  - Laser
   layers:
   - Default
   - TransparentFX

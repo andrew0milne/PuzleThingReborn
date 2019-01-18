@@ -17,6 +17,8 @@ public class MovingObject : MonoBehaviour
 
 	public bool is_active = false;
 
+    public bool clickable = true;
+
 	float t = 0.0f;
 
 	public Transform[] parents;
