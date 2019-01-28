@@ -23,11 +23,36 @@ public struct MidiHolder
         beat = bt;
         length = l;
         time = t;
+
+        name = "" + pitch + time;
     }
 
     public void Print()
     {
         Debug.Log("Pitch: " + pitch + ", Length: " + length + ", Time: " + time);
+    }
+}
+
+public class DependHolder : MonoBehaviour
+{
+    public MidiHolder note_1;
+    public MidiHolder note_2;
+
+    public int freq;
+
+    public void Init(MidiHolder a, MidiHolder b)
+    {
+        note_1 = a;
+        note_2 = b;
+        freq = 1;
+    }
+
+    public void Print()
+    {
+        note_1.Print();
+        note_2.Print();
+        Debug.Log(freq);
+        Debug.Log("----------");
     }
 }
 
@@ -74,7 +99,7 @@ public class MidiReader : MonoBehaviour
 
         CleanUp(0);
 
-        
+        Markov();
 
         foreach (MidiHolder mh in midi_holder[0])
         {
@@ -93,6 +118,7 @@ public class MidiReader : MonoBehaviour
                 //temp.transform.localScale = new Vector3(mh.length * 2.0f, 5.0f, 1.0f);
                 temp.transform.position = new Vector3(temp.transform.position.x, 6.0f, temp.transform.position.z + 2.0f);
                 colour = Color.black;
+                Destroy(temp.GetComponent<Rigidbody>());
             }
 
             temp.GetComponent<Renderer>().material.color = colour;
@@ -233,37 +259,60 @@ public class MidiReader : MonoBehaviour
         }
     }
 
+    bool CheckNotes(MidiHolder mh1, MidiHolder mh2, DependHolder dh)
+    {
+        if(mh1.pitch == dh.note_1.pitch && mh1.length == dh.note_1.length &&
+            mh2.pitch == dh.note_2.pitch && mh2.length == dh.note_2.length)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     List<MidiHolder> Markov()
     {
-        List<MidiHolder> markov_midi = new List<MidiHolder>();
+        List<DependHolder> freq_distribution = new List<DependHolder>();
 
-        int lowest_pitch = 10000000;
-        int highest_pitch = 0;
-
-        foreach(MidiHolder mh in midi_holder[0])
+        // Creates the frequency distribution
+        for (int i = 0; i < midi_holder[0].Count - 2; i++)
         {
-            if (mh.pitch != -1)
-            {
-                if (mh.pitch < lowest_pitch)
-                {
-                    lowest_pitch = mh.pitch;
-                }
+            bool found = false;
 
-                if(mh.pitch > highest_pitch)
+            // Checks to see if the current note sequence has been found before
+            foreach (DependHolder dh in freq_distribution)
+            {
+                if (CheckNotes(midi_holder[0][i], midi_holder[0][i + 1], dh))
                 {
-                    highest_pitch = mh.pitch;
+                    found = true;
+                    dh.freq++;
+                    break;
                 }
+            }
+
+            // If note create a new note sequence and add it the the distribution list
+            if(!found)
+            {
+                DependHolder temp_holder = new DependHolder();
+                temp_holder.Init(midi_holder[0][i], midi_holder[0][i + 1]);
+                
+                freq_distribution.Add(temp_holder);
             }
         }
 
-        int pitch_range = highest_pitch - lowest_pitch;
-
-        int[,] freq_dist = new int[pitch_range + 1, pitch_range + 1];
-
-        for (int i = 0; i < midi_holder[0].Count - 2; i++)
+        foreach(DependHolder dh in freq_distribution)
         {
-            //int current_pitch
-            freq_dist[midi_holder[0][i].pitch, midi_holder[0][i + 1].pitch]++;
+            dh.Print();
+        }
+
+
+        List<MidiHolder> markov_midi = new List<MidiHolder>();
+
+        markov_midi.Add(midi_holder[0][0]);
+
+        for(int i = 0; i < 20; i++)
+        {
+
         }
 
         return markov_midi;
