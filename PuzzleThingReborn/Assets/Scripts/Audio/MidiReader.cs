@@ -14,6 +14,8 @@ public struct MidiHolder
     public float length;
     public float time;
 
+    public string name;
+
     public void Init(int p, long br, float bt, float l, float t)
     {
         pitch = p;
@@ -25,7 +27,7 @@ public struct MidiHolder
 
     public void Print()
     {
-        Debug.Log("Pitch: " + pitch + ", Bar: " + bar + ", Beat: " + beat + ", Length: " + length + ", Time: " + time);
+        Debug.Log("Pitch: " + pitch + ", Length: " + length + ", Time: " + time);
     }
 }
 
@@ -49,7 +51,7 @@ public class MidiReader : MonoBehaviour
 
     public float speed = 0.0f;
 
-    
+    List<MidiHolder> new_midi;// = new List<MidiHolder>();
 
     public bool on = true;
 
@@ -65,87 +67,39 @@ public class MidiReader : MonoBehaviour
             midi_holder[i] = new List<MidiHolder>();
         }
 
+        List<MidiHolder> new_midi = new List<MidiHolder>();
 
-        
 
         ReadInMidi();
 
+        CleanUp(0);
+
         
-        
-        for (int i = 0; i < max_channels; i++)
+
+        foreach (MidiHolder mh in midi_holder[0])
         {
-            foreach(MidiHolder mh in midi_holder[i])
+            //mh.Print();
+
+            GameObject temp = Instantiate(cube, new Vector3(mh.time, mh.pitch / 10.0f, 0.0f), Quaternion.identity);//, parents[i].transform);
+
+            temp.GetComponent<SoundBlock>().Init(mh.pitch);
+            temp.transform.localScale = new Vector3(mh.length, 0.5f, 1.0f);
+            temp.transform.position += new Vector3(mh.length / 2.0f, 0.0f, 0.0f);
+
+            Color colour = Color.blue;
+
+            if (mh.pitch == -1)
             {
-                GameObject temp = Instantiate(cube, new Vector3(((mh.bar * 4) + (mh.beat))* 2.0f, mh.pitch / 10.0f, i * 2.0f), Quaternion.identity, parents[i].transform);
-
-                //temp.GetComponent<SoundBlock>().frequency = ;
-                temp.GetComponent<SoundBlock>().Init(mh.pitch);
-                temp.transform.localScale = new Vector3(mh.length * 2.0f, 0.5f, 1.0f);
-                temp.transform.position += new Vector3(mh.length / 4.0f, 0.0f, 0.0f);
-
-                Color colour = Color.white;
-
-                switch(i)
-                {
-                    case 0:
-                        colour = Color.red;
-                        break;
-                    case 1:
-                        colour = Color.blue;
-                        break;
-                    case 2:
-                        colour = Color.green;
-                        break;
-                    case 3:
-                        colour = Color.yellow;
-                        break;
-                    case 4:
-                        colour = Color.magenta;
-                        break;
-                    case 5:
-                        colour = Color.cyan;
-                        break;
-                    case 6:
-                        colour = Color.white;
-                        break;
-                    case 7:
-                        colour = Color.black;
-                        break;
-                    case 8:
-                        colour = new Color(1.0f, 0.5f, 0.0f);
-                        break;
-                    case 9:
-                        colour = new Color(0.0f, 0.5f, 1.0f);
-                        break;
-                    case 10:
-                        colour = new Color(1.0f, 0.0f, 0.5f);
-                        break;
-                    case 11:
-                        colour = new Color(1.0f, 0.5f, 1.0f);
-                        break;
-                    case 12:
-                        colour = new Color(1.0f, 1.0f, 0.5f);
-                        break;
-                    case 13:
-                        colour = new Color(1.0f, 1.0f, 0.5f);
-                        break;
-                    case 14:
-                        colour = new Color(1.0f, 0.5f, 0.0f);
-                        break;
-                    case 15:
-                        colour = new Color(1.0f, 0.5f, 0.0f);
-                        break;
-
-                }
- 
-                
-                 temp.GetComponent<Renderer>().material.color = colour;
-                
-
-                //mh.Print();
+                //temp.transform.localScale = new Vector3(mh.length * 2.0f, 5.0f, 1.0f);
+                temp.transform.position = new Vector3(temp.transform.position.x, 6.0f, temp.transform.position.z + 2.0f);
+                colour = Color.black;
             }
+
+            temp.GetComponent<Renderer>().material.color = colour;
+
         }
-        
+
+
     }
 
     void ReadInMidi()
@@ -172,6 +126,18 @@ public class MidiReader : MonoBehaviour
         //midi_file.Events.
     }
 
+    float RoundToDecimanl(float number, float deciml, bool can_be_zero)
+    {
+        float d = 1 / deciml;
+        float num = Mathf.Round(number * d) / d;
+        if (num < deciml && !can_be_zero)
+        {
+            num = deciml;
+        }
+
+        return num;
+    }
+
     private void ToMBT(NoteEvent note, long eventTime, int ticksPerQuarterNote, TimeSignatureEvent timeSignature)
     {
         int beatsPerBar;
@@ -180,7 +146,7 @@ public class MidiReader : MonoBehaviour
         long bar;
         float beat;
         long tick;
-        long time;
+        float time;
 
         string s = note.ToString();
 
@@ -197,20 +163,19 @@ public class MidiReader : MonoBehaviour
             bar = 1 + (eventTime / ticksPerBar);
             beat = 1 + ((eventTime % ticksPerBar) / ticksPerBeat);
             tick = eventTime % ticksPerBeat;
-            time = eventTime / ticksPerBeat;
+            time = eventTime / (float)ticksPerBeat;
 
-            float temp_length = (float)(int.Parse(s.Substring(num)) / (float)ticksPerQuarterNote);
+            float temp_length = (int.Parse(s.Substring(num)) / (float)ticksPerQuarterNote);
 
             MidiHolder temp_midi = new MidiHolder();
 
-            temp_length = Mathf.Round(temp_length * 4) / 4;
-            if(temp_length < 0.25f)
-            {
-                temp_length = 0.25f;
-            }
+            // Round to nearest 0.25
+            temp_length = RoundToDecimanl(temp_length, 0.25f, false);
+
+            time = RoundToDecimanl(time, 0.25f, true);
 
             temp_midi.Init(note.NoteNumber, bar, beat, temp_length, time);
-            temp_midi.Print();
+            //temp_midi.Print();
 
             midi_holder[note.Channel - 1].Add(temp_midi);
 
@@ -224,7 +189,6 @@ public class MidiReader : MonoBehaviour
                 max_time = eventTime + temp_length;
             }
         }
-
     }
 
     // Cleans up the list of midi events
@@ -232,25 +196,77 @@ public class MidiReader : MonoBehaviour
     // - Adds an event for sections with no notes (rests)
     void CleanUp(int channel)
     {
-        List<MidiHolder> new_midi = new List<MidiHolder>();
+        //new_midi = new List<MidiHolder>();
 
-        int iter = 0;
+        // Adds last event to new midi holder
+        // new_midi.Add(midi_holder[channel][0]);
 
         // Iterates through midi events
-        foreach(MidiHolder mh in midi_holder[channel])
+        for (int i = 0 ; i < midi_holder[channel].Count - 1; i++)
         {
-            // Doesn't include last event as that last note is either a part of the chords that came before it, or a single note
-            if (iter < midi_holder[channel].Count - 2)
-            {
-                // If the note happens at the same time as the next one
-                if (mh.bar == midi_holder[channel][iter++].bar && mh.beat == midi_holder[channel][iter++].beat)
-                {
+            
+            // Next note in midi_holder
+            MidiHolder current = midi_holder[channel][i];
+            MidiHolder next = midi_holder[channel][i + 1];
 
+            //// If chord
+            //if (new_midi[new_midi.Count - 1].time == next.time)
+            //{
+            //    MidiHolder temp = new_midi[new_midi.Count - 1];
+            //    temp.name += next.name + ":";
+            //    new_midi.RemoveAt(new_midi.Count - 1);
+            //    new_midi.Add(temp);
+            //}
+            // New note
+            
+
+            if(current.time + current.length != next.time)
+            {
+                MidiHolder rest = new MidiHolder();
+                float new_length = next.time - (current.time + current.length);
+                float new_time = current.time + current.length;
+                rest.Init(-1, -1, -1, new_length, new_time);
+
+                midi_holder[channel].Insert(i + 1, rest);
+                i--;
+            }
+        }
+    }
+
+    List<MidiHolder> Markov()
+    {
+        List<MidiHolder> markov_midi = new List<MidiHolder>();
+
+        int lowest_pitch = 10000000;
+        int highest_pitch = 0;
+
+        foreach(MidiHolder mh in midi_holder[0])
+        {
+            if (mh.pitch != -1)
+            {
+                if (mh.pitch < lowest_pitch)
+                {
+                    lowest_pitch = mh.pitch;
+                }
+
+                if(mh.pitch > highest_pitch)
+                {
+                    highest_pitch = mh.pitch;
                 }
             }
-
-            iter++;
         }
+
+        int pitch_range = highest_pitch - lowest_pitch;
+
+        int[,] freq_dist = new int[pitch_range + 1, pitch_range + 1];
+
+        for (int i = 0; i < midi_holder[0].Count - 2; i++)
+        {
+            int current_pitch
+            freq_dist[midi_holder[0][i].pitch, midi_holder[0][i + 1].pitch]++;
+        }
+
+        return markov_midi;
     }
 
     // Update is called once per frame
