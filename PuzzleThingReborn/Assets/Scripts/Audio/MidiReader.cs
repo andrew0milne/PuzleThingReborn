@@ -262,7 +262,7 @@ public class MidiReader : MonoBehaviour
 
         for (int i = 0; i < midi_holder[0].Count - 2; i++)
         {
-            int current_pitch
+            //int current_pitch
             freq_dist[midi_holder[0][i].pitch, midi_holder[0][i + 1].pitch]++;
         }
 
