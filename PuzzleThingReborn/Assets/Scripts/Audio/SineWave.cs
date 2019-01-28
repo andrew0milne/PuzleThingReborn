@@ -50,6 +50,8 @@ public class SineWave : MonoBehaviour {
 
     public float volume = 0.2f;
 
+    
+
     void Start()
     {
         MusicController = GameObject.FindGameObjectWithTag("MusicController");
@@ -76,6 +78,8 @@ public class SineWave : MonoBehaviour {
         audioSource.Play();
 
         grid = GetComponent<LaserGrid>();
+
+        
     }
 
     void InitBPM(float bpm_)
@@ -147,6 +151,8 @@ public class SineWave : MonoBehaviour {
 
     void Update()
     {
+        
+
         if (AudioSettings.dspTime >= nextTick)
         {
             grid.ToggleLasers(num[count]);

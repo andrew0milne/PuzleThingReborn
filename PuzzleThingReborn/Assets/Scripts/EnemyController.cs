@@ -71,8 +71,6 @@ public class EnemyController : MonoBehaviour
 
     IEnumerator LookAround()
     {
-        Debug.Log("look");
-
         current_state = State.LOOK;       
         float vel = agent.speed;
 

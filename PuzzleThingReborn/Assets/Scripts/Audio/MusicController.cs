@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public enum Scale { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
 
 public class MusicController : MonoBehaviour
@@ -16,7 +18,12 @@ public class MusicController : MonoBehaviour
     private string[] notes = new string[13] { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "AA" };
 
     public Scale scale;
+
     
+
+    public string midi_file_name;
+
+    //MidiIn
 
     public int[] GetScale()
     {
@@ -65,9 +72,13 @@ public class MusicController : MonoBehaviour
         return beats;
     }
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
     {
+       
+
+        
+
         musicObjects = GameObject.FindGameObjectsWithTag("MusicObject");
 
         foreach(GameObject go in musicObjects)
@@ -75,9 +86,11 @@ public class MusicController : MonoBehaviour
             go.SendMessage("InitBPM", bpm);
         }
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    
+
+    // Update is called once per frame
+    void Update ()
     {
 		
 	}
