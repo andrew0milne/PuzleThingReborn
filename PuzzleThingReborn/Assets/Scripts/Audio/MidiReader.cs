@@ -110,6 +110,9 @@ public class MidiReader : MonoBehaviour
 {
 
     public string midi_file_name;
+    public ScaleNote og_scale_note;
+    public ScaleType og_scale_type;
+
     MidiFile midi_file;
 
     public List<MidiHolder>[] midi_holder;
@@ -254,9 +257,9 @@ public class MidiReader : MonoBehaviour
             MidiHolder temp_midi = new MidiHolder();
 
             // Round to nearest 0.25
-            temp_length = RoundToDecimanl(temp_length, 0.25f, false);
+            temp_length = RoundToDecimanl(temp_length, MusicController.instance.shortest_note_length, false);
 
-            time = RoundToDecimanl(time, 0.25f, true);
+            time = RoundToDecimanl(time, MusicController.instance.shortest_note_length, true);
 
             temp_midi.Init(note.NoteNumber, bar, beat, temp_length, time);
             //temp_midi.Print();

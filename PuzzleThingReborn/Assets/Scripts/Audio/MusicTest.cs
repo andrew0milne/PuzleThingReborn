@@ -18,7 +18,7 @@ public class MusicTest : MonoBehaviour
     public bool[] beats;
     int count = 0;
 
-    //public GameObject cube;
+    public GameObject controller;
 
     void Start()
     {
@@ -30,14 +30,15 @@ public class MusicTest : MonoBehaviour
         //audio = GetComponent<AudioSource>();
 
         //beats = new bool[8];
+        controller = GameObject.FindGameObjectWithTag("MusicController");
     }
 
-    void InitBPM(float bpm_)
+    void Init(double b)
     {
-        bpm = bpm_;
+        bpm = MusicController.instance.bpm;
         double startTick = AudioSettings.dspTime;
         sampleRate = AudioSettings.outputSampleRate;
-        nextTick = startTick + (60.0f / (bpm / 2.0f)); ;// * sampleRate;
+        nextTick = b;// * sampleRate;
         //bpmInSeconds = (60.0f / (bpm * noteLength)) / 2.0f;
 
         audio = GetComponent<AudioSource>();
@@ -56,7 +57,7 @@ public class MusicTest : MonoBehaviour
             {
                 //cube.GetComponent<Renderer>().material.color = Color.black;
             }
-            nextTick += (60.0f / (bpm * noteLength)) / 2.0f; ;
+            nextTick += (60.0f / (MusicController.instance.bpm * noteLength));
             count++;
             if (count >= beats.Length)
             {

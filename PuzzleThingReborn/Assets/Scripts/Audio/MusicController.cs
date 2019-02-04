@@ -9,8 +9,11 @@ public enum ScaleNote { A, A_Sharp, B, C, C_Sharp, D, D_Sharp, E, F, F_Sharp, G,
 
 public class MusicController : MonoBehaviour
 {
+    public static MusicController instance = null;
+
     public GameObject[] musicObjects;
 
+    [Range(50.0f, 300.0f)]
     public float bpm;
 
     public float note_spawn_rate;
@@ -24,7 +27,10 @@ public class MusicController : MonoBehaviour
 
     public string midi_file_name;
 
-    //MidiIn
+    public float shortest_note_length = 0.25f;
+
+    bool done = false;
+    bool sent = false;
 
     public int[] GetScale()
     {
@@ -73,26 +79,66 @@ public class MusicController : MonoBehaviour
         return beats;
     }
 
+    private void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else if(instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Use this for initialization
     void Start ()
     {
-       
-
-        
-
         musicObjects = GameObject.FindGameObjectsWithTag("MusicObject");
 
-        foreach(GameObject go in musicObjects)
-        {
-            go.SendMessage("InitBPM", bpm);
-        }
+        StartCoroutine(SetUp());
 	}
 
-    
+    IEnumerator SetUp()
+    {
+        Debug.Log("3");
+
+        yield return new WaitForSeconds(1.0f);
+
+        Debug.Log("2");
+
+        yield return new WaitForSeconds(1.0f);
+
+        Debug.Log("1");
+
+        yield return new WaitForSeconds(1.0f);
+
+        double start_tick = AudioSettings.dspTime + (60.0f / (bpm / 2.0f));
+
+        foreach (GameObject go in musicObjects)
+        {
+            go.SendMessage("Init", start_tick);
+        }
+
+        Debug.Log("Go");
+
+        yield return null;
+    }
 
     // Update is called once per frame
     void Update ()
     {
-		
-	}
+		if(Input.GetKey(KeyCode.UpArrow))
+        {
+            bpm += Time.deltaTime * 10.0f;
+        }
+        else if (Input.GetKey(KeyCode.DownArrow))
+        {
+            bpm -= Time.deltaTime * 10.0f;
+        }
+
+        if(!sent)
+        { 
+}
+    }
 }
