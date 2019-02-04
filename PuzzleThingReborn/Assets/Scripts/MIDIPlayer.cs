@@ -9,6 +9,147 @@ using CSharpSynth.Midi;
 [RequireComponent(typeof(AudioSource))]
 public class MIDIPlayer : MonoBehaviour
 {
+    public enum Instrument
+    {
+        Piano1,
+        Piano2,
+        Piano3,
+        Honkytonk,
+        ElectricPiano1,
+        ElectricPiano2,
+        Harpsichord,
+        Clav,
+        Celesta,
+        Glockenspiel,
+        MusicBox,
+        Vibraphone,
+        Marimba,
+        Xylophone,
+        TubularBell,
+        Santur,
+        Organ1,
+        Organ2,
+        Organ3,
+        ChurchOrgan1,
+        ReedOrgan,
+        Accordion,
+        Harmonica,
+        Bandoneon,
+        NylonGtr,
+        SteelGtr,
+        JazzGtr,
+        CleanGtr,
+        MuteGtr,
+        OverdriveGtr,
+        DistortionGtr,
+        HarmonicGtr,
+        AcousticBass,
+        FingerBass,
+        PickedBass,
+        FretlessBass,
+        SlapBass1,
+        SlapBass2,
+        SynthBass1,
+        SynthBass2,
+        Violin,
+        Viola,
+        Cello,
+        Contrabass,
+        TremoloStr,
+        PizzicatoStr,
+        Harp,
+        Timpani,
+        Strings,
+        SlowStrings,
+        SynthStrings1,
+        SynthStrings2,
+        ChoirAahs,
+        VoiceOohs,
+        SynthVox,
+        OrchestraHit,
+        Trumpet,
+        Trombone,
+        Tuba,
+        MuteTrumpet,
+        FrenchHorns,
+        Brass1,
+        SynthBrass1,
+        SynthBrass2,
+        SopranoSax,
+        AltoSax,
+        TenorSax,
+        BaritoneSax,
+        Oboe,
+        EnglishHorn,
+        Bassoon,
+        Clarinet,
+        Piccolo,
+        Flute,
+        Recorder,
+        PanFlute,
+        BottleBlow,
+        Shakuhachi,
+        Whistle,
+        Ocarina,
+        SquareWave,
+        SawWave,
+        SynthCalliope,
+        ChifferLead,
+        Charang,
+        SoloVox,
+        FifthSawWave,
+        BassLead,
+        Fantasia,
+        WarmPad,
+        Polysynth,
+        SpaceVoice,
+        BowedGlass,
+        MetalPad,
+        HaloPad,
+        SweepPad,
+        IceRain,
+        Soundtrack,
+        Crystal,
+        Atmosphere,
+        Brightness,
+        Goblin,
+        EchoDrops,
+        StarTheme,
+        Sitar,
+        Banjo,
+        Shamisen,
+        Koto,
+        Kalimba,
+        Bagpipe,
+        Fiddle,
+        Shanai,
+        TinkleBell,
+        Agogo,
+        SteelDrums,
+        Woodblock,
+        Taiko,
+        MeloTom1,
+        SynthDrum,
+        ReverseCym,
+        GtFretNoise,
+        BreathNoise,
+        Seashore,
+        Bird,
+        Telephone1,
+        Helicopter,
+        Applause,
+        Gunshot,
+        Standard,
+        Room,
+        Power,
+        Electronic,
+        TREigthZeroEight,
+        Jazz,
+        Brush,
+        Orchestra,
+        SFX
+    }
+    
     //Public
     //Check the Midi's file folder for different songs
     public string midiFilePath = "Midis/Groove.mid";
@@ -19,13 +160,15 @@ public class MIDIPlayer : MonoBehaviour
     public int bufferSize = 1024;
     public int midiNote = 60;
     public int midiNoteVolume = 100;
-    [Range(0, 127)] //From Piano to Gunshot
-    public int midiInstrument = 0;
+    //[Range(0, 127)] //From Piano to Gunshot
+    public Instrument instrument = Instrument.SynthBass1;
+    
+    public int midiInstrument;
     //Private 
     private float[] sampleBuffer;
     private float gain = 1f;
     private MidiSequencer midiSequencer;
-    private StreamSynthesizer midiStreamSynthesizer;
+    private  StreamSynthesizer midiStreamSynthesizer;
 
     private float sliderValue = 1.0f;
     private float maxSliderValue = 127.0f;
@@ -34,6 +177,8 @@ public class MIDIPlayer : MonoBehaviour
     // is being loaded.
     void Awake()
     {
+        midiInstrument = (int)instrument;
+
         midiStreamSynthesizer = new StreamSynthesizer(44100, 2, bufferSize, 40);
         sampleBuffer = new float[midiStreamSynthesizer.BufferSize];
         
@@ -75,17 +220,18 @@ public class MIDIPlayer : MonoBehaviour
             midiSequencer.Stop(true);
         }
 
-        if (Input.GetButtonDown("Fire1"))
-        {
-            midiStreamSynthesizer.NoteOn(0, midiNote, midiNoteVolume, midiInstrument);
-        }
+        
+    }
 
-        if (Input.GetButtonUp("Fire1"))
-        {
-            midiStreamSynthesizer.NoteOff(0, midiNote);
-        }
+    public void NoteOn(int pitch)
+    {
 
+        midiStreamSynthesizer.NoteOn(0, pitch, midiNoteVolume, midiInstrument);
+    }
 
+    public void NoteOff(int pitch)
+    {
+        midiStreamSynthesizer.NoteOff(0, pitch);
     }
 
     private void OnCollisionEnter(Collision collision)

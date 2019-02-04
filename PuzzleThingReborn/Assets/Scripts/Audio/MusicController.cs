@@ -4,7 +4,8 @@ using UnityEngine;
 
 
 
-public enum Scale { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
+public enum ScaleType { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
+public enum ScaleNote { A, A_Sharp, B, C, C_Sharp, D, D_Sharp, E, F, F_Sharp, G, G_Sharp };
 
 public class MusicController : MonoBehaviour
 {
@@ -17,9 +18,9 @@ public class MusicController : MonoBehaviour
 
     private string[] notes = new string[13] { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "AA" };
 
-    public Scale scale;
+    public ScaleNote scale_note;
+    public ScaleType scale_type;
 
-    
 
     public string midi_file_name;
 
@@ -27,23 +28,23 @@ public class MusicController : MonoBehaviour
 
     public int[] GetScale()
     {
-        switch (scale)
+        switch (scale_type)
         {
-            case Scale.MAJOR:
+            case ScaleType.MAJOR:
                 return new int[8] { 0, 2, 4, 5, 7, 9, 11, 12 };
-            case Scale.MINOR:
+            case ScaleType.MINOR:
                 return new int[8] { 0, 2, 3, 5, 7, 8, 10, 12 };
-            case Scale.DORIAN:
+            case ScaleType.DORIAN:
                 return new int[8] { 0, 2, 3, 5, 7, 9, 10, 12 };
-            case Scale.PHRYGIAN:
+            case ScaleType.PHRYGIAN:
                 return new int[8] { 0, 1, 3, 5, 7, 8, 10, 12 };
-            case Scale.LYDIAN:
+            case ScaleType.LYDIAN:
                 return new int[8] { 0, 2, 4, 6, 7, 9, 11, 12 };
-            case Scale.MIXOLYDIAN:
+            case ScaleType.MIXOLYDIAN:
                 return new int[8] { 0, 2, 4, 5, 7, 9, 10, 12 };
-            case Scale.LOCRIAN:
+            case ScaleType.LOCRIAN:
                 return new int[8] { 0, 1, 3, 5, 6, 8, 10, 12 };
-            case Scale.PENTATONIC:
+            case ScaleType.PENTATONIC:
                 return new int[8] { 0, 2, 4, 0, 7, 9, 12, 12 };
         }
 

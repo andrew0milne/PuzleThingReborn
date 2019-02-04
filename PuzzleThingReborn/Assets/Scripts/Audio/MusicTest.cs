@@ -22,12 +22,12 @@ public class MusicTest : MonoBehaviour
 
     void Start()
     {
-        double startTick = AudioSettings.dspTime;
-        sampleRate = AudioSettings.outputSampleRate;
-        nextTick = startTick;// * sampleRate;
-        bpmInSeconds = (60.0f / (bpm * noteLength)) / 2.0f;
+        //double startTick = AudioSettings.dspTime;
+        //sampleRate = AudioSettings.outputSampleRate;
+        //nextTick = startTick + (60.0f / (bpm / 2.0f)); ;// * sampleRate;
+        //bpmInSeconds = (60.0f / (bpm * noteLength)) / 2.0f;
 
-        audio = GetComponent<AudioSource>();
+        //audio = GetComponent<AudioSource>();
 
         //beats = new bool[8];
     }
@@ -35,6 +35,12 @@ public class MusicTest : MonoBehaviour
     void InitBPM(float bpm_)
     {
         bpm = bpm_;
+        double startTick = AudioSettings.dspTime;
+        sampleRate = AudioSettings.outputSampleRate;
+        nextTick = startTick + (60.0f / (bpm / 2.0f)); ;// * sampleRate;
+        //bpmInSeconds = (60.0f / (bpm * noteLength)) / 2.0f;
+
+        audio = GetComponent<AudioSource>();
     }
 
     private void Update()
