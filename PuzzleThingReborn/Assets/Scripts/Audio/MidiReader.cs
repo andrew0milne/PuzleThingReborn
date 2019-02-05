@@ -137,6 +137,8 @@ public class MidiReader : MonoBehaviour
 
     public bool generate_visualiser = false;
 
+    MidiHolder first_note;
+
     // Use this for initialization
     void Awake()
     {
@@ -208,6 +210,16 @@ public class MidiReader : MonoBehaviour
 
                     temp.GetComponent<Renderer>().material.color = colour;
                 }
+            }
+        }
+
+        foreach(MidiHolder mh in midi_holder[channel])
+        {
+            
+            if (mh.pitch != -1)
+            {
+                first_note = mh;
+                break;
             }
         }
 
@@ -334,13 +346,16 @@ public class MidiReader : MonoBehaviour
     {
         //for(int i = 0; i < midi_holder[channel].Count - 1; i++)
         //{
-        //    if(midi_holder[channel][i].pitch != -1)
+
+        //    if (midi_holder[channel][i].pitch != -1)
         //    {
         //        return midi_holder[channel][i];
         //    }
         //}
-
+        Debug.Log("stuck");
         return midi_holder[channel][0];
+
+        //return first_note.pitch;
     }
 
     public List<DependHolder> FreqDistribution()
@@ -418,7 +433,11 @@ public class MidiReader : MonoBehaviour
             }
         }
 
-        return GetFirstNote();
+        MidiHolder note = new MidiHolder();
+        note = GetFirstNote();
+        //note.length = MusicController.instance.shortest_note_length;
+
+        return note;
     }
 
     List<MidiHolder> Markov()

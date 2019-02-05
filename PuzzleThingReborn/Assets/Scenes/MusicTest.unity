@@ -157,7 +157,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &37791909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,7 +332,7 @@ MonoBehaviour:
   bufferSize: 1024
   midiNote: 60
   midiNoteVolume: 100
-  instrument: 0
+  instrument: 5
   midiInstrument: 33
 --- !u!82 &101399879
 AudioSource:
@@ -472,7 +472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &271954213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,7 +487,6 @@ MonoBehaviour:
   midi_reader: {fileID: 1058322125}
   midi_player: {fileID: 37791908}
   bpm: 90
-  music_controller: {fileID: 890863030}
 --- !u!4 &271954214
 Transform:
   m_ObjectHideFlags: 0
@@ -781,13 +780,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicObjects: []
-  bpm: 90
   note_spawn_rate: 0
   rest_spawn_rate: 0
+  bpm: 240
   scale_note: 0
-  scale_type: 1
+  scale_type: 0
+  time_sig_top: 4
+  time_sig_bottom: 4
   midi_file_name: 
   shortest_note_length: 0.25
+  time_step: 0
 --- !u!4 &890863032
 Transform:
   m_ObjectHideFlags: 0
@@ -967,7 +969,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1058322126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -979,7 +981,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1443995fc71dfe4b9771b9e0c4a15ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  midi_file_name: hysteria
+  midi_file_name: king
   og_scale_note: 0
   og_scale_type: 0
   channel: 0
@@ -1217,7 +1219,6 @@ MonoBehaviour:
   midi_reader: {fileID: 1869720424}
   midi_player: {fileID: 101399875}
   bpm: 90
-  music_controller: {fileID: 890863030}
 --- !u!4 &1560182442
 Transform:
   m_ObjectHideFlags: 0
@@ -1605,8 +1606,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   midi_file_name: hysteria
   og_scale_note: 0
-  og_scale_type: 1
-  channel: 0
+  og_scale_type: 0
+  channel: 9
   cube: {fileID: 1045800146569276, guid: f8933adcecdee4d46ae93b83c843864f, type: 2}
   parents:
   - {fileID: 1724541294}
@@ -1628,7 +1629,7 @@ MonoBehaviour:
   max_time: 0
   speed: 0
   on: 1
-  notes_to_make: 200
+  notes_to_make: 90
   generate_visualiser: 0
 --- !u!4 &1869720426
 Transform:
