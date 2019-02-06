@@ -32,6 +32,8 @@ public class MyMidiPlayer : MonoBehaviour
     int num_chord = 0;
     int num_note = 0;
 
+    public bool markov = true;
+
     // Use this for initialization
     void Start ()
     {
@@ -52,6 +54,8 @@ public class MyMidiPlayer : MonoBehaviour
         freq_dist = reader_script.FreqDistribution();
 
         note = new MidiHolder();
+
+        
         note = reader_script.GetFirstNote();
         
         last_note = note;
@@ -139,48 +143,60 @@ public class MyMidiPlayer : MonoBehaviour
         {
             if (AudioSettings.dspTime >= nextTick)
             {
-                if (beat == 0.0f)// && note.pitch != -1)
+                if(markov)
                 {
-                    midi_player.GetComponent<MIDIPlayer>().NoteOn(num_note + 33);                    
+                    if (last_note.pitch != -1)
+                    {
+                        midi_player.GetComponent<MIDIPlayer>().NoteOff(last_note.pitch);
+                    }
+
+                    if (note.pitch != -1)
+                    {
+                        midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch);                
+                    }
+
+                    last_note = note;
+
+
+                    note = reader_script.GetNote(freq_dist, last_note);
+
+                    //Debug.Log(note.length);
+
+                    nextTick += (60.0f / (MusicController.instance.bpm / note.length));
                 }
-                else if(beat == shortest_note_length * 4.0f)
+                else
                 {
-                    midi_player.GetComponent<MIDIPlayer>().NoteOff(num_note + 33);
-                    num_note = num_chord;
+                    if (beat == 0.0f)// && note.pitch != -1)
+                    {
+                        midi_player.GetComponent<MIDIPlayer>().NoteOn(num_note + 33);
+                    }
+                    else if (beat == shortest_note_length * 4.0f)
+                    {
+                        midi_player.GetComponent<MIDIPlayer>().NoteOff(num_note + 33);
+                        num_note = num_chord;
+                    }
+
+                    if (beat == shortest_note_length * 4.0f)// && note.pitch != -1)
+                    {
+                        //GetChord(note.pitch, true);
+                        GetChord(num_chord, true);
+
+                    }
+                    else if (beat == 0.0f)
+                    {
+                        //GetChord(note.pitch, false);
+                        GetChord(num_chord, false);
+                        //num2 = Random.Range(0, 3);
+
+                        num_chord = MusicController.instance.GetNextChord(num_chord);
+                    }
+
+                    nextTick += MusicController.instance.time_step;
                 }
 
-                if (beat == shortest_note_length * 4.0f)// && note.pitch != -1)
-                {
-                    //GetChord(note.pitch, true);
-                    GetChord(num_chord, true);
-  
-                }
-                else if (beat == 0.0f)
-                {
-                    //GetChord(note.pitch, false);
-                    GetChord(num_chord, false);
-                    //num2 = Random.Range(0, 3);
+                
 
-                    num_chord = MusicController.instance.GetNextChord(num_chord);
-                }
-
-                //if (last_note.pitch != -1)
-                //{
-                //    midi_player.GetComponent<MIDIPlayer>().NoteOff(last_note.pitch);
-                //}
-
-
-                //if (note.pitch != -1)
-                //{
-                //    midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch);                
-                //}
-
-                //last_note = note;
-
-
-                //note = reader_script.GetNote(freq_dist, last_note);
-
-                //Debug.Log(note.length);
+                
 
                 beat += shortest_note_length;
                 if(beat >= 2.0f)
@@ -189,7 +205,7 @@ public class MyMidiPlayer : MonoBehaviour
                     bar++;
                 }
 
-                nextTick += MusicController.instance.time_step;// (60.0f / (MusicController.instance.bpm / note.length));
+                //nextTick += MusicController.instance.time_step;// (60.0f / (MusicController.instance.bpm / note.length));
             }
         }
     }
