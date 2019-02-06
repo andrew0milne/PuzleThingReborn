@@ -325,13 +325,11 @@ public class MidiReader : MonoBehaviour
             temp_midi_holder[i] = new List<MidiHolder>();
         }
 
-        Debug.Log(midi_holder[channel].Count);
-
-        for (int i = 0; i < midi_holder[channel].Count; i++)
+        for (int i = 0; i < midi_holder[channel].Count - 1; i++)
         {
             // Next note in midi_holder
             MidiHolder current = midi_holder[channel][i];
-            MidiHolder next = midi_holder[channel][i - 1];
+            MidiHolder next = midi_holder[channel][i + 1];
 
             MidiHolder temp = new MidiHolder();
             temp.Init(current.pitch[0], current.bar, current.beat, current.length, current.time);
@@ -346,8 +344,11 @@ public class MidiReader : MonoBehaviour
                 if (i + 1 < midi_holder[channel].Count)
                 {
                     i++;
-                    next = midi_holder[channel][i + 1];
-                    time = next.time;
+                    if (i + 1 < midi_holder[channel].Count)
+                    {
+                      next = midi_holder[channel][i + 1];
+                      time = next.time;
+                    }
                 }
                 else
                 {
@@ -359,10 +360,10 @@ public class MidiReader : MonoBehaviour
             temp_midi_holder[channel].Add(temp);
         }
 
-        Debug.Log(midi_holder[channel].Count);
-        Debug.Log("-----");
+        
 
         midi_holder[channel] = temp_midi_holder[channel];
+
     }
 
     bool CheckNotes(MidiHolder mh1, MidiHolder mh2)
@@ -385,16 +386,6 @@ public class MidiReader : MonoBehaviour
 
     public MidiHolder GetFirstNote()
     {
-        //for(int i = 0; i < midi_holder[channel].Count - 1; i++)
-        //{
-
-        //    if (midi_holder[channel][i].pitch != -1)
-        //    {
-        //        return midi_holder[channel][i];
-        //    }
-        //}
-
-
         Debug.Log("stuck");
         return midi_holder[channel][0];
 

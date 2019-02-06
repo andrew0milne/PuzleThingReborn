@@ -116,29 +116,40 @@ public class MusicController : MonoBehaviour
         }
 
 
-        chords[0].Add(1);
-        chords[0].Add(2);
-        chords[0].Add(3);
+        //chords[0].Add(1);
+        //chords[0].Add(2);
+        //chords[0].Add(3);
+        //chords[0].Add(3);
+        //chords[0].Add(4);
+        //chords[0].Add(4);
+        //chords[0].Add(5);
+
+        //chords[1].Add(4);
+        //chords[1].Add(2);
+
+        //chords[2].Add(5);
+        //chords[2].Add(3);
+
+        //chords[3].Add(1);
+        //chords[3].Add(4);
+        //chords[3].Add(4);
+        //chords[3].Add(4);
+
+        //chords[4].Add(2);
+        //chords[4].Add(5);
+        //chords[4].Add(0);
+        //chords[4].Add(0);
+
+        //chords[5].Add(3);
+        //chords[5].Add(1);
+        //chords[5].Add(1);
+
         chords[0].Add(4);
-        chords[0].Add(5);
-
-        chords[1].Add(4);
-        chords[1].Add(2);
-
-        chords[2].Add(5);
-        chords[2].Add(3);
-
-        chords[3].Add(1);
-        chords[3].Add(4);
-
-        chords[4].Add(2);
         chords[4].Add(5);
-        chords[4].Add(0);
-
         chords[5].Add(3);
-        chords[5].Add(1);
-        
-       
+        chords[3].Add(0);
+
+
     }
 
     public int GetNextChord(int chords_name)
@@ -147,11 +158,20 @@ public class MusicController : MonoBehaviour
 
         int num = Random.Range(0, chords[chords_name].Count);
 
+        int[] scale = GetScale();
+
         return chords[chords_name][num];
     }
 
+    public int GetChordRootNote(int i)
+    {
+        int[] scale = GetScale();
+
+        return scale[i];
+    }
+
     IEnumerator SetUp()
-    {    
+    {     
         Debug.Log("2");
 
         yield return new WaitForSeconds(1.0f);

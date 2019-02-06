@@ -34,6 +34,8 @@ public class MyMidiPlayer : MonoBehaviour
 
     public bool markov = true;
 
+    int base_note = 36;
+
     // Use this for initialization
     void Start ()
     {
@@ -69,7 +71,7 @@ public class MyMidiPlayer : MonoBehaviour
 	
     int GetBasicPitch(int pitch)
     {
-        int base_note = 33;
+        
         int note = pitch;
 
         while(pitch > base_note + 11)
@@ -85,11 +87,13 @@ public class MyMidiPlayer : MonoBehaviour
     {
         if (on)
         {
-            pitch += 33;
+            pitch = MusicController.instance.GetChordRootNote(pitch);
+
+            pitch += base_note;
 
             int base_pitch = GetBasicPitch(pitch) + 12;
 
-            int pitch_dif = base_pitch - 33;
+            int pitch_dif = base_pitch - base_note;
 
             int[] scale_notes = MusicController.instance.GetScale();
 
@@ -105,7 +109,7 @@ public class MyMidiPlayer : MonoBehaviour
             }
 
             chord[0] = base_pitch;
-            if(num +2 >= 7)
+            if(num + 2 >= 7)
             {
                 chord[1] = base_pitch + scale_notes[num - 5];
             }
@@ -114,7 +118,7 @@ public class MyMidiPlayer : MonoBehaviour
                 chord[1] = base_pitch + scale_notes[num + 2];
             }
             
-            if(num +5 >= 7)
+            if(num + 4 >= 7)
             {
                 chord[2] = base_pitch + scale_notes[num - 3];
             }
@@ -126,6 +130,8 @@ public class MyMidiPlayer : MonoBehaviour
             midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[0]);
             midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[1]);
             midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[2]);
+
+            
         }
         else
         {
@@ -155,9 +161,10 @@ public class MyMidiPlayer : MonoBehaviour
 
                     if (note.pitch[0] != -1)
                     {
-                        for (int i = 0; i < last_note.pitch.Count; i++)
+                        for (int i = 0; i < note.pitch.Count; i++)
                         {
-                            midi_player.GetComponent<MIDIPlayer>().NoteOn(last_note.pitch[i]);
+                            //Debug.Log()
+                            midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch[i]);
                         }
                     }
 
@@ -172,29 +179,22 @@ public class MyMidiPlayer : MonoBehaviour
                 }
                 else
                 {
-                    if (beat == 0.0f)// && note.pitch != -1)
+                    if (beat == 0.0f)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOn(num_note + 33);
+                        midi_player.GetComponent<MIDIPlayer>().NoteOn(MusicController.instance.GetChordRootNote(num_note) + base_note);
+                        GetChord(num_chord, false);
+
+                        
                     }
                     else if (beat == shortest_note_length * 4.0f)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOff(num_note + 33);
-                        num_note = num_chord;
-                    }
+                        midi_player.GetComponent<MIDIPlayer>().NoteOff(MusicController.instance.GetChordRootNote(num_note) + base_note);
 
-                    if (beat == shortest_note_length * 4.0f)// && note.pitch != -1)
-                    {
-                        //GetChord(note.pitch, true);
+                        num_chord = num_note;
+
                         GetChord(num_chord, true);
 
-                    }
-                    else if (beat == 0.0f)
-                    {
-                        //GetChord(note.pitch, false);
-                        GetChord(num_chord, false);
-                        //num2 = Random.Range(0, 3);
-
-                        num_chord = MusicController.instance.GetNextChord(num_chord);
+                        num_note = MusicController.instance.GetNextChord(num_note);
                     }
 
                     nextTick += MusicController.instance.time_step;
