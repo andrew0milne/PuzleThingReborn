@@ -1632,7 +1632,7 @@ MonoBehaviour:
   speed: 0
   on: 1
   notes_to_make: 90
-  generate_visualiser: 0
+  generate_visualiser: 1
 --- !u!4 &1869720426
 Transform:
   m_ObjectHideFlags: 0

@@ -41,8 +41,6 @@ public class MyMidiPlayer : MonoBehaviour
         reader_script.ReadInMidi();
 
         chord = new int[3];
-
-        
     }
 
     void Init(double b)
@@ -59,12 +57,14 @@ public class MyMidiPlayer : MonoBehaviour
         note = reader_script.GetFirstNote();
         
         last_note = note;
-        last_note.pitch = -1;
+        last_note.pitch[0] = -1;
 
         //double startTick = AudioSettings.dspTime;
         nextTick = b;
 
         playing = true;
+
+        Debug.Log("hello there");
     }
 	
     int GetBasicPitch(int pitch)
@@ -145,14 +145,20 @@ public class MyMidiPlayer : MonoBehaviour
             {
                 if(markov)
                 {
-                    if (last_note.pitch != -1)
+                    if (last_note.pitch[0] != -1)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOff(last_note.pitch);
+                        for (int i = 0; i < last_note.pitch.Count; i++)
+                        {
+                            midi_player.GetComponent<MIDIPlayer>().NoteOff(last_note.pitch[i]);
+                        }
                     }
 
-                    if (note.pitch != -1)
+                    if (note.pitch[0] != -1)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch);                
+                        for (int i = 0; i < last_note.pitch.Count; i++)
+                        {
+                            midi_player.GetComponent<MIDIPlayer>().NoteOn(last_note.pitch[i]);
+                        }
                     }
 
                     last_note = note;

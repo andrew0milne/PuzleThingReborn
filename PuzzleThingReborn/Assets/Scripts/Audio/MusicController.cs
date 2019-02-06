@@ -151,11 +151,7 @@ public class MusicController : MonoBehaviour
     }
 
     IEnumerator SetUp()
-    {
-        Debug.Log("3");
-
-        yield return new WaitForSeconds(1.0f);
-
+    {    
         Debug.Log("2");
 
         yield return new WaitForSeconds(1.0f);
