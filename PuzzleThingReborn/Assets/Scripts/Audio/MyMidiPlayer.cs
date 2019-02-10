@@ -5,7 +5,8 @@ using UnityEngine;
 public class MyMidiPlayer : MonoBehaviour
 {
 
-    private double nextTick = 0.0f;
+    private double nextTickMarkov = 0.0f;
+    private double nextTickChords = 0.0f;
 
     public GameObject midi_reader;
     MidiReader reader_script;
@@ -62,75 +63,27 @@ public class MyMidiPlayer : MonoBehaviour
         last_note.pitch[0] = -1;
 
         //double startTick = AudioSettings.dspTime;
-        nextTick = b;
+        nextTickMarkov = b;
+        nextTickChords = b;
 
         playing = true;
 
         Debug.Log("hello there");
     }
 	
-    int GetBasicPitch(int pitch)
-    {
-        
-        int note = pitch;
-
-        while(pitch > base_note + 11)
-        {
-            pitch -= 12;
-        }
-
-        return pitch;
-    }
+    
 
     // code
     void GetChord(int pitch, bool on)
     {
         if (on)
         {
-            pitch = MusicController.instance.GetChordRootNote(pitch);
-
-            pitch += base_note;
-
-            int base_pitch = GetBasicPitch(pitch) + 12;
-
-            int pitch_dif = base_pitch - base_note;
-
-            int[] scale_notes = MusicController.instance.GetScale();
-
-            int num = 0;
-
-            for(int i = 0; i < 7; i++)
+            for(int i = 0; i <3; i++)
             {
-                if(pitch_dif == scale_notes[i])
-                {
-                    num = i;
-                    break;
-                }
+                chord[i] = MusicController.instance.GetNoteInChord(pitch, i);
+                chord[i] += 48;
+                midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[i]);
             }
-
-            chord[0] = base_pitch;
-            if(num + 2 >= 7)
-            {
-                chord[1] = base_pitch + scale_notes[num - 5];
-            }
-            else
-            {
-                chord[1] = base_pitch + scale_notes[num + 2];
-            }
-            
-            if(num + 4 >= 7)
-            {
-                chord[2] = base_pitch + scale_notes[num - 3];
-            }
-            else
-            {
-                chord[2] = base_pitch + scale_notes[num + 4];
-            }
-
-            midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[0]);
-            midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[1]);
-            midi_player.GetComponent<MIDIPlayer>().NoteOn(chord[2]);
-
             
         }
         else
@@ -147,7 +100,7 @@ public class MyMidiPlayer : MonoBehaviour
     {
         if (playing)
         {
-            if (AudioSettings.dspTime >= nextTick)
+            if (AudioSettings.dspTime >= nextTickMarkov)
             {
                 if(markov)
                 {
@@ -156,62 +109,87 @@ public class MyMidiPlayer : MonoBehaviour
                         for (int i = 0; i < last_note.pitch.Count; i++)
                         {
                             midi_player.GetComponent<MIDIPlayer>().NoteOff(last_note.pitch[i]);
-                        }
+                        }                        
                     }
 
                     if (note.pitch[0] != -1)
                     {
                         for (int i = 0; i < note.pitch.Count; i++)
                         {
-                            //Debug.Log()
-                            midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch[i]);
+                            midi_player.GetComponent<MIDIPlayer>().NoteOn(note.pitch[i]);                         
                         }
+
+                       
                     }
 
                     last_note = note;
 
-
                     note = reader_script.GetNote(freq_dist, last_note);
 
-                    //Debug.Log(note.length);
-
-                    nextTick += (60.0f / (MusicController.instance.bpm / note.length));
+                    nextTickMarkov += (60.0f / (MusicController.instance.bpm / note.length));
+                    
                 }
                 else
                 {
                     if (beat == 0.0f)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOn(MusicController.instance.GetChordRootNote(num_note) + base_note);
-                        GetChord(num_chord, false);
+                        midi_player.GetComponent<MIDIPlayer>().NoteOn(MusicController.instance.GetChordRootNote(num_note) + 36);
+                        Debug.Log(MusicController.instance.GetChordRootNote(num_note));
 
-                        
+                        GetChord(MusicController.instance.GetChordRootNote(num_note), false);
                     }
                     else if (beat == shortest_note_length * 4.0f)
                     {
-                        midi_player.GetComponent<MIDIPlayer>().NoteOff(MusicController.instance.GetChordRootNote(num_note) + base_note);
+                        midi_player.GetComponent<MIDIPlayer>().NoteOff(MusicController.instance.GetChordRootNote(num_note) + 36);
 
                         num_chord = num_note;
 
-                        GetChord(num_chord, true);
+                        GetChord(MusicController.instance.GetChordRootNote(num_note), true);
 
                         num_note = MusicController.instance.GetNextChord(num_note);
                     }
 
-                    nextTick += MusicController.instance.time_step;
+                    nextTickChords += MusicController.instance.time_step;
                 }
 
-                
+                //beat += shortest_note_length;
+                //if(beat >= 2.0f)
+                //{
+                //    beat = 0.0f;
+                //    bar++;
+                //}
 
-                
+                //nextTick += MusicController.instance.time_step;// (60.0f / (MusicController.instance.bpm / note.length));
+            }
+
+            if(AudioSettings.dspTime >= nextTickChords)
+            {
+                if (beat == 0.0f)
+                {
+                    num_chord = note.pitch[0];
+                    if (num_chord != -1)
+                    {
+                        num_chord = MusicController.instance.GetRootNote();
+                        
+                    }
+                    GetChord(num_chord, true);
+                }
+                else if (beat == shortest_note_length )
+                {
+                    //if (num_chord != -1)
+                    //{
+                        GetChord(num_chord, false);
+                    //}
+                }
 
                 beat += shortest_note_length;
-                if(beat >= 2.0f)
+                if (beat >= 2.0f)
                 {
                     beat = 0.0f;
                     bar++;
                 }
 
-                //nextTick += MusicController.instance.time_step;// (60.0f / (MusicController.instance.bpm / note.length));
+                nextTickChords += MusicController.instance.time_step;
             }
         }
     }

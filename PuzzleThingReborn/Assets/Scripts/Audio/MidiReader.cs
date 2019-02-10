@@ -386,7 +386,7 @@ public class MidiReader : MonoBehaviour
 
     public MidiHolder GetFirstNote()
     {
-        Debug.Log("stuck");
+       
         return midi_holder[channel][0];
 
         //return first_note.pitch;
@@ -435,7 +435,7 @@ public class MidiReader : MonoBehaviour
 
     public MidiHolder GetNote(List<DependHolder> freq, MidiHolder previous_note)
     {
-        Debug.Log("Get next note");
+        //Debug.Log("Get next note");
 
         foreach (DependHolder dh in freq)
         {
@@ -448,13 +448,13 @@ public class MidiReader : MonoBehaviour
                 {
                     p += nn.freq;
 
-                    Debug.Log(p + " >= " + random + "?");
+                    //Debug.Log(p + " >= " + random + "?");
 
 
 
                     if (p >= random)
                     {
-                        Debug.Log("yes");
+                        //Debug.Log("yes");
 
                         MidiHolder new_note = new MidiHolder();
                         new_note.pitch = nn.note.pitch;
@@ -462,14 +462,14 @@ public class MidiReader : MonoBehaviour
 
                         return new_note;                     
                     }
-                    Debug.Log("no");
+                    //Debug.Log("no");
                 }
 
                 break;
             }
         }
 
-        Debug.Log("ERROR: NO NOTE GENERATED");
+        Debug.Log("ERROR: NO NOTE GENERATED, RESTARTING MARKOV");
 
         MidiHolder note = new MidiHolder();
         note = GetFirstNote();
