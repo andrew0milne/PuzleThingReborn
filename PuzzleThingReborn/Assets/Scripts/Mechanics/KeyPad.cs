@@ -37,7 +37,7 @@ public class KeyPad : MonoBehaviour
 		yield return null;
 	}
 
-	void ButtonPressed(int input)
+	public void ButtonPressed(int input)
 	{
 		if (!display_message) 
 		{

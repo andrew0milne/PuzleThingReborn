@@ -14,7 +14,7 @@ public class ButtonInput : MovingObject
 	protected override void Start()
 	{
 		base.Start ();
-
+                
 		if (input_num >= 0) 
 		{
 			text.text = "" + input_num;
@@ -35,7 +35,7 @@ public class ButtonInput : MovingObject
 		{
 			base.Activate ();
 			is_active = true;
-			input_target.SendMessage ("ButtonPressed", input_num);
+			input_target.SendMessage("ButtonPressed",input_num);
 		}
 	}
 }

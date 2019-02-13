@@ -64,7 +64,7 @@ public class MovingObject : MonoBehaviour
 
 	public IEnumerator Move()
 	{
-		float t = 0;
+        float t = 0;
 
 		while (t <= 1.1f) 
 		{
@@ -116,7 +116,7 @@ public class MovingObject : MonoBehaviour
 
 	protected virtual void Activate()
 	{
-		if(!is_active)
+        if (!is_active)
 		{
 			is_active = true;
 

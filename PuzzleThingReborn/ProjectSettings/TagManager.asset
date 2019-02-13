@@ -14,6 +14,8 @@ TagManager:
   - MusicController
   - Laser
   - NoteBlock
+  - Walkable
+  - KeyPadCont
   layers:
   - Default
   - TransparentFX
@@ -24,9 +26,9 @@ TagManager:
   - 
   - 
   - IgnoreLight
-  - 
-  - 
-  - 
+  - Player
+  - Equipment
+  - Walkable
   - 
   - 
   - 
