@@ -524,11 +524,14 @@ public class MusicController : MonoBehaviour
 
         bool found_note = false;
 
-        foreach(DependHolder dh in freq)
+        MidiHolder first = reader_script.GetFirstNote();
+
+        foreach (DependHolder dh in freq)
         {
             if(GetBasicPitch(dh.note.pitch[0]) == GetBasicPitch(chords[0].pitch[0]))
             {
-                melody.Add(dh.note);
+                Debug.Log("FOUND AT 0");
+                first = dh.note;
                 found_note = true;
                 break;
             }
@@ -540,7 +543,8 @@ public class MusicController : MonoBehaviour
             {
                 if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 1))
                 {
-                    melody.Add(dh.note);
+                    Debug.Log("FOUND AT 1");
+                    first = dh.note;
                     found_note = true;
                     break;
                 }
@@ -553,14 +557,15 @@ public class MusicController : MonoBehaviour
             {
                 if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 2))
                 {
-                    melody.Add(dh.note);
+                    Debug.Log("FOUND AT 2");
+                    first = dh.note;
                     found_note = true;
                     break;
                 }
             }
         }
 
-        //melody.Add(reader_script.GetFirstNote());
+        melody.Add(first);
         length_left -= melody[0].length;
 
         while(length_left >= 0)
@@ -593,71 +598,100 @@ public class MusicController : MonoBehaviour
         List<MidiHolder> answer_melo = GetBasicMelody(max_phrase_length, answer_chords);
         List<MidiHolder> answer_2_melo = GetBasicMelody(max_phrase_length, answer_2_chords);
 
+        // Add basic Motif
+        foreach (MidiHolder c in basic_motif_chords)
+        {
+            scale_progression[0].Add(c);
+
+        }
+
+        // Add anser to basic motif
+        foreach (MidiHolder c in answer_chords)
+        {
+            scale_progression[0].Add(c);
+
+        }
+
+        // Add basic motif again
+        foreach (MidiHolder c in basic_motif_chords)
+        {
+            scale_progression[0].Add(c);
+
+        }
+
+        // Add end
+        foreach (MidiHolder c in answer_2_chords)
+        {
+            scale_progression[0].Add(c);
+
+        }
+
+
 
         // Add basic Motif
-        foreach (MidiHolder c in basic_motif)
+        foreach (MidiHolder c in basic_motif_melo)
         {
-            scale_progression.Add(c);
+            scale_progression[1].Add(c);
            
         }
         
         // Add anser to basic motif
-        foreach (MidiHolder c in answer)
+        foreach (MidiHolder c in answer_melo)
         {
-            scale_progression.Add(c);
+            scale_progression[1].Add(c);
             
         }
        
         // Add basic motif again
-        foreach (MidiHolder c in basic_motif)
+        foreach (MidiHolder c in basic_motif_melo)
         {
-            scale_progression.Add(c);
+            scale_progression[1].Add(c);
            
         }
        
         // Add end
-        foreach (MidiHolder c in answer_2)
+        foreach (MidiHolder c in answer_2_melo)
         {
-            scale_progression.Add(c);
+            scale_progression[1].Add(c);
             
         }
        
         return scale_progression;
     }
 
-    public List<MidiHolder> GetThemeNotes(bool scentence, float max_phrase_length, List<MidiHolder> chords)
-    {
-        List<MidiHolder> melody = new List<MidiHolder>();
+    //public List<MidiHolder> GetThemeNotes(bool scentence, float max_phrase_length, List<MidiHolder> chords)
+    //{
+    //    List<MidiHolder> melody = new List<MidiHolder>();
 
-        List<MidiHolder> basic_motif = GetBasicMelody(max_phrase_length);
-        List<MidiHolder> answer = GetBasicMelody(max_phrase_length);
-        List<MidiHolder> answer_2 = GetBasicMelody(max_phrase_length);
+    //    List<MidiHolder> basic_motif = GetBasicMelody(max_phrase_length);
+    //    List<MidiHolder> answer = GetBasicMelody(max_phrase_length);
+    //    List<MidiHolder> answer_2 = GetBasicMelody(max_phrase_length);
 
-        answer_2[answer_2.Count - 1].pitch[0] = GetRootNote() + 36;
+    //    answer_2[answer_2.Count - 1].pitch[0] = GetRootNote() + 36;
 
-        foreach(MidiHolder mh in basic_motif)
-        {
-            melody.Add(mh);
-        }
+    //    foreach(MidiHolder mh in basic_motif)
+    //    {
+    //        melody.Add(mh);
+    //    }
 
-        foreach (MidiHolder mh in answer)
-        {
-            melody.Add(mh);
-        }
+    //    foreach (MidiHolder mh in answer)
+    //    {
+    //        melody.Add(mh);
+    //    }
 
-        foreach (MidiHolder mh in basic_motif)
-        {
-            melody.Add(mh);
-        }
+    //    foreach (MidiHolder mh in basic_motif)
+    //    {
+    //        melody.Add(mh);
+    //    }
 
-        foreach (MidiHolder mh in answer_2)
-        {
-            melody.Add(mh);
-        }
+    //    foreach (MidiHolder mh in answer_2)
+    //    {
+    //        melody.Add(mh);
+    //    }
 
 
-        return melody;
-    }
+    //    return melody;
+    //}
 
     // Update is called once; per frame
     void Update ()

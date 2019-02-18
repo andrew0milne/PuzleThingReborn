@@ -73,6 +73,10 @@ public class MyMidiPlayer : MonoBehaviour
         theme = MusicController.instance.GetTheme(true, 4, 1.0f, 2.0f, 4.0f);
         //melody = MusicController.instance.GetThemeNotes(true, 4.0f);
 
+        theme_counter = new int[2] { 0, 0 };
+        
+
+
         note = theme[1][0];
         last_note = note;
         last_note.pitch[0] = -1;
@@ -106,29 +110,29 @@ public class MyMidiPlayer : MonoBehaviour
 
     void PlayScale()
     {
-        if (AudioSettings.dspTime >= nextTickChords)
+        if (AudioSettings.dspTime >= nextTickChords && chords)
         {
-            int num = theme_counter - 1;
+            int num = theme_counter[0] - 1;
             if (num < 0)
             {
-                num = theme.Count - 1;
+                num = theme[0].Count - 1;
             }
 
-            GetChord(theme[num].pitch[0], false);
+            GetChord(theme[0][num].pitch[0], false);
 
-            GetChord(theme[theme_counter].pitch[0], true);
-            Debug.Log(theme[theme_counter].pitch[0] + ", " + theme[theme_counter].length);          
+            GetChord(theme[0][theme_counter[0]].pitch[0], true);
+            Debug.Log(theme[0][theme_counter[0]].pitch[0] + ", " + theme[0][theme_counter[0]].length);          
 
-            nextTickChords += (60.0f / (MusicController.instance.bpm / theme[theme_counter].length));
+            nextTickChords += (60.0f / (MusicController.instance.bpm / theme[0][theme_counter[0]].length));
 
-            theme_counter++;
-            if (theme_counter >= theme.Count)
+            theme_counter[0]++;
+            if (theme_counter[0] >= theme[0].Count)
             {
-                theme_counter = 0;
+                theme_counter[0] = 0;
             }
         }
 
-        if (AudioSettings.dspTime >= nextTickMarkov)
+        if (AudioSettings.dspTime >= nextTickMarkov && markov)
         {
 
             if (last_note.pitch[0] != -1)
@@ -156,12 +160,12 @@ public class MyMidiPlayer : MonoBehaviour
 
             last_note = note;
 
-            melody_counter++;
-            if(melody_counter >= melody.Count)
+            theme_counter[1]++;
+            if(theme_counter[1] >= theme[1].Count)
             {
-                melody_counter = 0;
+                theme_counter[1] = 0;
             }
-            note = melody[melody_counter];
+            note = theme[1][theme_counter[1]];
 
             nextTickMarkov += (60.0f / (MusicController.instance.bpm / note.length));
 
