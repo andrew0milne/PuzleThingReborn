@@ -20,6 +20,8 @@ public class MusicTest : MonoBehaviour
 
     public GameObject controller;
 
+
+    bool playing = false;
     void Start()
     {
         //double startTick = AudioSettings.dspTime;
@@ -42,26 +44,31 @@ public class MusicTest : MonoBehaviour
         //bpmInSeconds = (60.0f / (bpm * noteLength)) / 2.0f;
 
         audio = GetComponent<AudioSource>();
+
+        playing = true;
     }
 
     private void Update()
     {
-        if (AudioSettings.dspTime >= nextTick)
+        if (playing)
         {
-            if (beats[count] == true)
+            if (AudioSettings.dspTime >= nextTick)
             {
-                audio.Play();
-                //cube.GetComponent<Renderer>().material.color = Color.red;
-            }
-            else
-            {
-                //cube.GetComponent<Renderer>().material.color = Color.black;
-            }
-            nextTick += (60.0f / (MusicController.instance.bpm * noteLength));
-            count++;
-            if (count >= beats.Length)
-            {
-                count = 0;
+                if (beats[count] == true)
+                {
+                    audio.Play();
+                    //cube.GetComponent<Renderer>().material.color = Color.red;
+                }
+                else
+                {
+                    //cube.GetComponent<Renderer>().material.color = Color.black;
+                }
+                nextTick += (60.0f / (MusicController.instance.bpm * noteLength));
+                count++;
+                if (count >= beats.Length)
+                {
+                    count = 0;
+                }
             }
         }
     }

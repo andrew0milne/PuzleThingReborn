@@ -7,6 +7,17 @@ using UnityEngine;
 public enum ScaleType { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
 public enum ScaleNote { C, C_Sharp, D, D_Sharp, E, F, F_Sharp, G, G_Sharp, A, A_Sharp, B, };
 
+public class Chord : ScriptableObject
+{
+    public int root;
+    public float length;
+
+    public void init(int r, float l)
+    {
+        root = r;
+        length = l;
+    }
+}
 
 public class MusicController : MonoBehaviour
 {
@@ -38,193 +49,25 @@ public class MusicController : MonoBehaviour
 
     List<int>[] chords;
 
-    // Return the notes of the current scale
-    // In semitones
-    public int[] GetScale()
-    {
-        switch (scale_type)
-        {
-            case ScaleType.MAJOR:
-                return new int[7] { 0, 2, 4, 5, 7, 9, 11 };
-            case ScaleType.MINOR:                        
-                return new int[7] { 0, 2, 3, 5, 7, 8, 10 };
-            case ScaleType.DORIAN:                       
-                return new int[7] { 0, 2, 3, 5, 7, 9, 10 };
-            case ScaleType.PHRYGIAN:                     
-                return new int[7] { 0, 1, 3, 5, 7, 8, 10 };
-            case ScaleType.LYDIAN:                       
-                return new int[7] { 0, 2, 4, 6, 7, 9, 11 };
-            case ScaleType.MIXOLYDIAN:                   
-                return new int[7] { 0, 2, 4, 5, 7, 9, 10 };
-            case ScaleType.LOCRIAN:                      
-                return new int[7] { 0, 1, 3, 5, 6, 8, 10 };
-            case ScaleType.PENTATONIC:                   
-                return new int[7] { 0, 2, 4, 0, 7, 9, 12 };
-        }
+    public GameObject midi_reader;
+    MidiReader reader_script;
 
-        return null;
-    }
-
-    // Returns the root note of the current scale
-    // A = 0
-    // A_Sharp = 1
-    // So on
-    public int GetRootNote()
-    {
-        switch(scale_note)
-        {       
-            case ScaleNote.C:
-                return 0;
-            case ScaleNote.C_Sharp:
-                return 1;
-            case ScaleNote.D:
-                return 2;
-            case ScaleNote.D_Sharp:
-                return 3;
-            case ScaleNote.E:
-                return 4;
-            case ScaleNote.F:
-                return 5;
-            case ScaleNote.F_Sharp:
-                return 6;
-            case ScaleNote.G:
-                return 7;
-            case ScaleNote.G_Sharp:
-                return 8;
-            case ScaleNote.A:
-                return 9;
-            case ScaleNote.A_Sharp:
-                return 10;
-            case ScaleNote.B:
-                return 11;
-            default:
-                return 0;
-        }
-    }
-
-    // Converts 'pitch' to the lowest version of that note
-    // 48 (C4) -> 0
-    public int GetBasicPitch(int pitch)
-    {
-        int note = pitch;
-        
-        while (note > 11)
-        {
-            note -= 12;
-        }
-
-        return note;
-    }
-
-    int GetSemitoneDif(int note, int root)
-    {
-        if(root > note)
-        {
-            note += 12;
-        }
-
-        return note - root;
-    }
-
-    // Gets the chord number of note, based on the current scale
-    // If in D Major, and the note is A
-    // D -> 2, A -> 9
-    // 9 - 2 = 5, chord = V
-    public int GetChordNumber(int note)
-    {
-        int[] scale = GetScale();
-
-        int lowest_pitch = GetSemitoneDif(GetBasicPitch(note), GetRootNote());
-
-        for (int i = 0; i < 7; i++)
-        {
-            // Returns chord number
-            if (lowest_pitch == scale[i])
-            {
-                return i;
-            }
-        }
-
-        // Returns first chord
-        return 0;
-    }
-
-    public int GetNoteInChord(int pitch, int note_in_chord)
-    {
-        int[] scale = GetScale();
-
-        int num = GetChordNumber(pitch);
-        int base_pitch = GetBasicPitch(pitch);
-        int base_note = GetRootNote();
-
-        int final_note = 0;
-
-        if (note_in_chord == 0)
-        {
-            final_note = scale[num];
-        }
-        else if (note_in_chord == 1)
-        {
-            if (num + 2 >= 7)
-            {
-                final_note = scale[num - 5];
-            }
-            else
-            {
-                final_note = scale[num + 2];
-            }
-        }
-        else if (note_in_chord == 2)
-        {
-            if (num + 4 >= 7)
-            {
-                final_note = scale[num - 3];
-            }
-            else
-            {
-                final_note = scale[num + 4];
-            }
-        }
-
-        return final_note + base_note;
-    }
-
-    //public string [] GetNotes(int note_count)
-    //{
-    //    string[] beats = new string[note_count];
-
-    //    int[] current_scale = GetScale();
-
-    //    for(int i = 0; i < note_count; i++)
-    //    {
-    //        // If true make a note
-    //        if(Random.Range(0.0f, 1.0f) >= rest_spawn_rate)
-    //        {
-    //            beats[i] = notes[current_scale[(int)Random.Range(0, 7)]];
-    //        }
-    //        else
-    //        {
-    //            beats[i] = "";
-    //        }
-    //    }
-
-    //    return beats;
-    //}
+    List<DependHolder> freq;
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
         }
-        else if(instance != this)
+        else if (instance != this)
         {
             Destroy(gameObject);
         }
     }
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         musicObjects = GameObject.FindGameObjectsWithTag("MusicObject");
 
@@ -273,28 +116,21 @@ public class MusicController : MonoBehaviour
         chords[5].Add(3);
         chords[3].Add(0);
 
+        reader_script = midi_reader.GetComponent<MidiReader>();
+        reader_script.ReadInMidi();
+        freq = reader_script.FreqDistribution();
+
+        int[]scale =GetScale();
+
+        for(int i = 0; i < 7; i++)
+        {
+            Debug.Log(scale[i] + "-->"+ GetNoteName(scale[i]));
+        }
 
     }
 
-    public int GetNextChord(int chords_name)
-    {
-        int num = Random.Range(0, chords[chords_name].Count);
-
-        int[] scale = GetScale();
-
-        return chords[chords_name][num];
-    }
-
-    public int GetChordRootNote(int chord_name)
-    {
-        int[] scale = GetScale();
-
-        return scale[chord_name];
-    }
-
-    
     IEnumerator SetUp()
-    {     
+    {
         Debug.Log("2");
 
         yield return new WaitForSeconds(1.0f);
@@ -315,6 +151,514 @@ public class MusicController : MonoBehaviour
         yield return null;
     }
 
+
+    // Return the notes of the current scale
+    // In semitones
+    public int[] GetScale()
+    {
+        int[] scale;
+
+        switch (scale_type)
+        {
+            case ScaleType.MAJOR:
+                scale = new int[7] { 0, 2, 4, 5, 7, 9, 11 };
+                break;
+            case ScaleType.MINOR:
+                scale = new int[7] { 0, 2, 3, 5, 7, 8, 10 };
+                break;
+            case ScaleType.DORIAN:
+                scale = new int[7] { 0, 2, 3, 5, 7, 9, 10 };
+                break;
+            case ScaleType.PHRYGIAN:
+                scale = new int[7] { 0, 1, 3, 5, 7, 8, 10 };
+                break;
+            case ScaleType.LYDIAN:
+                scale = new int[7] { 0, 2, 4, 6, 7, 9, 11 };
+                break;
+            case ScaleType.MIXOLYDIAN:
+                scale = new int[7] { 0, 2, 4, 5, 7, 9, 10 };
+                break;
+            case ScaleType.LOCRIAN:
+                scale = new int[7] { 0, 1, 3, 5, 6, 8, 10 };
+                break;
+            case ScaleType.PENTATONIC:
+                scale = new int[7] { 0, 2, 4, 0, 7, 9, 12 };
+                break;
+            default:
+                scale = new int[7] { 0, 2, 3, 5, 7, 8, 10 };
+                break;
+        }
+
+        int root = GetRootNote();
+
+        for(int i = 0; i < 7; i++)
+        {
+            scale[i] += root;
+            scale[i] = GetBasicPitch(scale[i]);
+        }
+
+        return scale;
+    }
+
+   
+    public int RoundNote(int pitch)
+    {
+        int[] scale = GetScale();
+
+        int base_pitch = GetBasicPitch(pitch);
+        int pitch_shift = PitchShiftDegree(pitch);
+
+        foreach(int i in scale)
+        {
+            if(base_pitch == i)
+            {
+                return base_pitch + (12 * pitch_shift);
+            }
+            else if(base_pitch + 1 == i)
+            {
+                return base_pitch + 1 + (12 * pitch_shift);
+            }
+        }
+
+        return pitch;
+    }
+
+    int GetWrappedIncrement(int note, int increment)
+    {
+        int[] scale = GetScale();
+       
+        if(note + increment >= 7)
+        {
+            return increment - 7;
+        }
+
+        return increment;
+    }
+
+    public bool IsInChord(int pitch, int chord_root)
+    {
+        int lowest_pitch = GetBasicPitch(pitch);
+        int[] scale = GetScale();
+
+        if (pitch == scale[chord_root])
+        {
+            return true;
+        }
+        else if (pitch == scale[GetWrappedIncrement(chord_root, 2)])
+        {
+            return true;
+        }
+        else if (pitch == scale[GetWrappedIncrement(chord_root, 4)])
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Returns the root note of the current scale
+    // A = 0
+    // A_Sharp = 1
+    // So on
+    public int GetRootNote()
+    {
+        switch(scale_note)
+        {       
+            case ScaleNote.C:
+                return 0;
+            case ScaleNote.C_Sharp:
+                return 1;
+            case ScaleNote.D:
+                return 2;
+            case ScaleNote.D_Sharp:
+                return 3;
+            case ScaleNote.E:
+                return 4;
+            case ScaleNote.F:
+                return 5;
+            case ScaleNote.F_Sharp:
+                return 6;
+            case ScaleNote.G:
+                return 7;
+            case ScaleNote.G_Sharp:
+                return 8;
+            case ScaleNote.A:
+                return 9;
+            case ScaleNote.A_Sharp:
+                return 10;
+            case ScaleNote.B:
+                return 11;
+            default:
+                return 0;
+        }
+    }
+
+    public string GetNoteName(int pitch)
+    {
+        int base_pitch = GetBasicPitch(pitch);
+
+        switch(base_pitch)
+        {
+            case 0:
+                return "C";
+            case 1:
+                return "C#";
+            case 2:
+                return "D";
+            case 3:
+                return "D#";
+            case 4:
+                return "E";
+            case 5:
+                return "F";
+            case 6:
+                return "F#";
+            case 7:
+                return "G";
+            case 8:
+                return "G#";
+            case 9:
+                return "A";
+            case 10:
+                return "A#";
+            case 11:
+                return "B";
+            default:
+                return "--";
+        }
+    }
+
+    // Converts 'pitch' to the lowest version of that note
+    // 48 (C4) -> 0
+    public int GetBasicPitch(int pitch)
+    {
+        int note = pitch;
+        
+        while (note > 11)
+        {
+            note -= 12;
+        }
+
+        return note;
+    }
+
+    int PitchShiftDegree(int pitch)
+    {
+        int note = pitch;
+        int pitch_shift = 0;
+
+        while (note > 11)
+        {
+            note -= 12;
+            pitch_shift++;
+        }
+
+        return pitch_shift;
+    }
+
+
+    int GetSemitoneDif(int note, int root)
+    {
+        if(root > note)
+        {
+            note += 12;
+        }
+
+        return note - root;
+    }
+
+    // Gets the chord number of note, based on the current scale
+    // If in D Major, and the note is A
+    // D -> 2, A -> 9
+    // 9 - 2 = 5, chord = V
+    public int GetChordNumber(int note)
+    {
+        int[] scale = GetScale();
+
+        int lowest_pitch = GetSemitoneDif(GetBasicPitch(note), GetRootNote());
+
+        for (int i = 0; i < 7; i++)
+        {
+            // Returns chord number
+            if (lowest_pitch == scale[i])
+            {
+                Debug.Log(i);
+                return i;
+            }
+        }
+
+        // Returns first chord
+        return 0;
+    }
+
+    public int GetNoteInChord(int root, int note_in_chord)
+    {
+        int[] scale = GetScale();
+
+        //int num = GetChordNumber(pitch);
+        //int base_pitch = GetBasicPitch(pitch);
+        //int base_note = GetRootNote();
+
+        int final_note = 0;
+
+        if (note_in_chord == 0)
+        {
+            final_note = scale[root];
+        }
+        else if (note_in_chord == 1)
+        {
+            if (root + 2 >= 7)
+            {
+                final_note = scale[root - 5];
+            }
+            else
+            {
+                final_note = scale[root + 2];
+            }
+        }
+        else if (note_in_chord == 2)
+        {
+            if (root + 4 >= 7)
+            {
+                final_note = scale[root - 3];
+            }
+            else
+            {
+                final_note = scale[root + 4];
+            }
+        }
+
+        return final_note;// + base_note;
+    }
+
+    //public string [] GetNotes(int note_count)
+    //{
+    //    string[] beats = new string[note_count];
+
+    //    int[] current_scale = GetScale();
+
+    //    for(int i = 0; i < note_count; i++)
+    //    {
+    //        // If true make a note
+    //        if(Random.Range(0.0f, 1.0f) >= rest_spawn_rate)
+    //        {
+    //            beats[i] = notes[current_scale[(int)Random.Range(0, 7)]];
+    //        }
+    //        else
+    //        {
+    //            beats[i] = "";
+    //        }
+    //    }
+
+    //    return beats;
+    //}
+
+   
+
+    public int GetNextChord(int chords_name)
+    {
+        int num = Random.Range(0, chords[chords_name].Count);
+
+        int[] scale = GetScale();
+
+        return chords[chords_name][num];
+    }
+
+    public int GetChordRootNote(int chord_name)
+    {
+        int[] scale = GetScale();
+
+        return scale[chord_name];
+    }
+  
+    List<MidiHolder> GetBasicScale(int chords_per_phrase, float length_min, float length_max, float max_phrase_length)
+    {
+        List<MidiHolder> basic_scale = new List<MidiHolder>();
+        MidiHolder first = new MidiHolder();
+        float len = Random.Range(length_min, length_max);
+        len = RoundToDecimanl(len, shortest_note_length * 2.0f, false);
+
+
+        first.Init(Random.Range(0, 6), len);
+
+        float length_left = max_phrase_length - first.length;
+
+        basic_scale.Add(first);
+
+        for (int i = 1; i < chords_per_phrase - 1; i++)
+        {
+
+            MidiHolder temp = new MidiHolder();
+            float length = Random.Range(length_min, length_max);
+            length = RoundToDecimanl(length, shortest_note_length * 2.0f, false);
+
+            //Debug.Log(length_left + "-" + length + "=" + (length_left - length));
+
+            if (length_left - length < 0)
+            {
+                length = length_left;
+            }
+
+            temp.Init(GetNextChord(basic_scale[basic_scale.Count - 1].pitch[0]), length);
+            basic_scale.Add(temp);
+            length_left -= temp.length;
+            
+        }
+
+        if (length_left > 0)
+        {
+            MidiHolder last = new MidiHolder();
+            last.Init(GetNextChord(basic_scale[basic_scale.Count - 1].pitch[0]), length_left);
+            basic_scale.Add(last);
+        }
+        
+        
+
+        return basic_scale;
+    }
+
+    List<MidiHolder> GetBasicMelody(float max_phrase_length, List<MidiHolder> chords)
+    {
+        List<MidiHolder> melody = new List<MidiHolder>();
+        float length_left = max_phrase_length;
+
+        bool found_note = false;
+
+        foreach(DependHolder dh in freq)
+        {
+            if(GetBasicPitch(dh.note.pitch[0]) == GetBasicPitch(chords[0].pitch[0]))
+            {
+                melody.Add(dh.note);
+                found_note = true;
+                break;
+            }
+        }
+
+        if(found_note == false)
+        {
+            foreach (DependHolder dh in freq)
+            {
+                if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 1))
+                {
+                    melody.Add(dh.note);
+                    found_note = true;
+                    break;
+                }
+            }
+        }
+
+        if (found_note == false)
+        {
+            foreach (DependHolder dh in freq)
+            {
+                if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 2))
+                {
+                    melody.Add(dh.note);
+                    found_note = true;
+                    break;
+                }
+            }
+        }
+
+        //melody.Add(reader_script.GetFirstNote());
+        length_left -= melody[0].length;
+
+        while(length_left >= 0)
+        {
+            melody.Add(reader_script.GetNote(freq, melody[melody.Count - 1]));
+            length_left -= melody[melody.Count - 1].length;
+        }
+
+        return melody;
+    }
+
+    public List<MidiHolder>[] GetTheme(bool scentence, int chords_per_phrase, float length_min, float length_max, float max_phrase_length)
+    {
+        List<MidiHolder>[] scale_progression = new List<MidiHolder>[2];
+
+        for(int i = 0; i < 2; i++)
+        {
+            scale_progression[i] = new List<MidiHolder>();
+        }
+
+
+        List<MidiHolder> basic_motif_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
+        List<MidiHolder> answer_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
+        List<MidiHolder> answer_2_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
+
+        answer_2_chords[answer_2_chords.Count - 1].pitch[0] = 0;
+
+
+        List<MidiHolder> basic_motif_melo = GetBasicMelody(max_phrase_length, basic_motif_chords);
+        List<MidiHolder> answer_melo = GetBasicMelody(max_phrase_length, answer_chords);
+        List<MidiHolder> answer_2_melo = GetBasicMelody(max_phrase_length, answer_2_chords);
+
+
+        // Add basic Motif
+        foreach (MidiHolder c in basic_motif)
+        {
+            scale_progression.Add(c);
+           
+        }
+        
+        // Add anser to basic motif
+        foreach (MidiHolder c in answer)
+        {
+            scale_progression.Add(c);
+            
+        }
+       
+        // Add basic motif again
+        foreach (MidiHolder c in basic_motif)
+        {
+            scale_progression.Add(c);
+           
+        }
+       
+        // Add end
+        foreach (MidiHolder c in answer_2)
+        {
+            scale_progression.Add(c);
+            
+        }
+       
+        return scale_progression;
+    }
+
+    public List<MidiHolder> GetThemeNotes(bool scentence, float max_phrase_length, List<MidiHolder> chords)
+    {
+        List<MidiHolder> melody = new List<MidiHolder>();
+
+        List<MidiHolder> basic_motif = GetBasicMelody(max_phrase_length);
+        List<MidiHolder> answer = GetBasicMelody(max_phrase_length);
+        List<MidiHolder> answer_2 = GetBasicMelody(max_phrase_length);
+
+        answer_2[answer_2.Count - 1].pitch[0] = GetRootNote() + 36;
+
+        foreach(MidiHolder mh in basic_motif)
+        {
+            melody.Add(mh);
+        }
+
+        foreach (MidiHolder mh in answer)
+        {
+            melody.Add(mh);
+        }
+
+        foreach (MidiHolder mh in basic_motif)
+        {
+            melody.Add(mh);
+        }
+
+        foreach (MidiHolder mh in answer_2)
+        {
+            melody.Add(mh);
+        }
+
+
+        return melody;
+    }
+
     // Update is called once; per frame
     void Update ()
     {
@@ -328,5 +672,17 @@ public class MusicController : MonoBehaviour
         {
             bpm -= Time.deltaTime * 10.0f;
         }
+    }
+
+    float RoundToDecimanl(float number, float deciml, bool can_be_zero)
+    {
+        float d = 1 / deciml;
+        float num = Mathf.Round(number * d) / d;
+        if (num < deciml && !can_be_zero)
+        {
+            num = deciml;
+        }
+
+        return num;
     }
 }

@@ -26,6 +26,13 @@ public class MidiHolder : MonoBehaviour
         //name = "" + pitch + time;
     }
 
+    public void Init(int p, float l)
+    {
+        pitch = new List<int>();
+        pitch.Add(p);
+        length = l;
+    }
+
     public void Print()
     {
         Debug.Log("Pitch: " + pitch + ", Length: " + length + ", Time: " + time);
@@ -112,6 +119,8 @@ public class MidiReader : MonoBehaviour
     public ScaleNote og_scale_note;
     public ScaleType og_scale_type;
 
+    int scale_root;
+
     MidiFile midi_file;
 
     public List<MidiHolder>[] midi_holder;
@@ -142,6 +151,11 @@ public class MidiReader : MonoBehaviour
     void Awake()
     {
         //Debug.Log(Application.dataPath + "/Audio/Midi Files/" + midi_file_name + ".mid");
+
+        MusicController.instance.scale_note = og_scale_note;
+        MusicController.instance.scale_type = og_scale_type;
+
+        scale_root = MusicController.instance.GetRootNote();
 
         midi_holder = new List<MidiHolder>[max_channels];
 
@@ -277,7 +291,7 @@ public class MidiReader : MonoBehaviour
 
             time = RoundToDecimanl(time, MusicController.instance.shortest_note_length, true);
 
-            temp_midi.Init(note.NoteNumber, bar, beat, temp_length, time);
+            temp_midi.Init(note.NoteNumber - scale_root, bar, beat, temp_length, time);
             //temp_midi.Print();
 
             midi_holder[note.Channel - 1].Add(temp_midi);
@@ -431,6 +445,53 @@ public class MidiReader : MonoBehaviour
         }
 
         return freq_distribution;  
+    }
+
+    public MidiHolder GetNoteWithChord(List<DependHolder> freq, MidiHolder previous_note, int chord_root)
+    {
+        foreach (DependHolder dh in freq)
+        {
+            if (CheckNotes(previous_note, dh.note))
+            {
+                foreach(NextNote nn in dh.next_note)
+                {
+                    if(MusicController.instance.IsInChord(nn.note.pitch[0], chord_root))
+                    {
+                        MidiHolder new_note = new MidiHolder();
+                        new_note.pitch = nn.note.pitch;
+                        new_note.length = nn.note.length;
+
+                        return new_note;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        Debug.Log("ERROR: NO NEXT NOTE FOUND, CHECKING ALL NOTES");
+
+        foreach (DependHolder dh in freq)
+        {
+            if(MusicController.instance.IsInChord(dh.note.pitch[0], chord_root))
+            {
+                MidiHolder new_note = new MidiHolder();
+                new_note.pitch = dh.note.pitch;
+                new_note.length = dh.note.length;
+
+                return new_note;
+            }
+        }
+
+        Debug.Log("ERROR: NO NOTE GENERATED, GENERATING BASE NOTE");
+
+        MidiHolder note = new MidiHolder();
+        note.pitch = new List<int>();
+        int[] scale = MusicController.instance.GetScale();
+        note.pitch.Add(scale[chord_root]);
+        note.length = 1.0f;
+
+        return note;
     }
 
     public MidiHolder GetNote(List<DependHolder> freq, MidiHolder previous_note)
