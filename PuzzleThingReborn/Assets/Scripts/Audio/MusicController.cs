@@ -200,7 +200,7 @@ public class MusicController : MonoBehaviour
         return scale;
     }
 
-   
+    // Converts the pitch to be in the current scale   
     public int RoundNote(int pitch)
     {
         int[] scale = GetScale();
@@ -526,44 +526,61 @@ public class MusicController : MonoBehaviour
 
         MidiHolder first = reader_script.GetFirstNote();
 
-        foreach (DependHolder dh in freq)
+        for(int i = 0; i < 3; i++)
         {
-            if(GetBasicPitch(dh.note.pitch[0]) == GetBasicPitch(chords[0].pitch[0]))
+            if (found_note == false)
             {
-                Debug.Log("FOUND AT 0");
-                first = dh.note;
-                found_note = true;
-                break;
-            }
-        }
-
-        if(found_note == false)
-        {
-            foreach (DependHolder dh in freq)
-            {
-                if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 1))
+                foreach (DependHolder dh in freq)
                 {
-                    Debug.Log("FOUND AT 1");
-                    first = dh.note;
-                    found_note = true;
-                    break;
+                    if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), i))
+                    {
+                        Debug.Log("FOUND AT " + i);
+                        first = dh.note;
+                        found_note = true;
+                        break;
+                    }
                 }
             }
         }
 
-        if (found_note == false)
-        {
-            foreach (DependHolder dh in freq)
-            {
-                if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 2))
-                {
-                    Debug.Log("FOUND AT 2");
-                    first = dh.note;
-                    found_note = true;
-                    break;
-                }
-            }
-        }
+        /*foreach (DependHolder dh in freq)
+        //{
+        //    if(GetBasicPitch(dh.note.pitch[0]) == GetBasicPitch(chords[0].pitch[0]))
+        //    {
+        //        Debug.Log("FOUND AT 0");
+        //        first = dh.note;
+        //        found_note = true;
+        //        break;
+        //    }
+        //}
+        //
+        //if(found_note == false)
+        //{
+        //    foreach (DependHolder dh in freq)
+        //    {
+        //        if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 1))
+        //        {
+        //            Debug.Log("FOUND AT 1");
+        //            first = dh.note;
+        //            found_note = true;
+        //            break;
+        //        }
+        //    }
+        //}
+        //
+        //if (found_note == false)
+        //{
+        //    foreach (DependHolder dh in freq)
+        //    {
+        //        if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 2))
+        //        {
+        //            Debug.Log("FOUND AT 2");
+        //            first = dh.note;
+        //            found_note = true;
+        //            break;
+        //        }
+        //    }
+        //}*/
 
         melody.Add(first);
         length_left -= melody[0].length;
@@ -572,6 +589,75 @@ public class MusicController : MonoBehaviour
         {
             melody.Add(reader_script.GetNote(freq, melody[melody.Count - 1]));
             length_left -= melody[melody.Count - 1].length;
+        }
+
+        foreach(MidiHolder mh in melody)
+        {
+            Debug.Log(GetNoteName(mh.pitch[0]));
+        }
+
+        return melody;
+    }
+
+    int[] GetFullChord(int root_note)
+    {
+        int[] full_chord = new int[4];
+
+        full_chord[0] = GetNoteInChord(root_note, 0);
+        full_chord[1] = GetNoteInChord(root_note, 1);
+        full_chord[2] = GetNoteInChord(root_note, 2);
+        full_chord[3] = full_chord[0] + 12;
+
+        return full_chord;
+
+    }
+
+
+
+    List<MidiHolder> AlterMelodyToChords(List<MidiHolder> melody, List<MidiHolder> chords)
+    {
+        float current_time = 0.0f;
+
+        int chord_iter = 0;
+
+        foreach(MidiHolder mh in melody)
+        {
+            mh.pitch[0] += GetRootNote();
+
+            //int chord_pitch_dif = PitchShiftDegree(mh.pitch[0]);
+            //int pitch_dif = 10000;
+
+            //if(current_time >= chords[chord_iter].length)
+            //{
+            //    current_time = 0.0f;
+            //    chord_iter++;
+            //}
+
+            //if(chord_iter >= chords.Count)
+            //{
+            //    break;
+            //}
+            ////Debug.Log("iter " + chord_iter);
+
+            ////Get the actual chord based of time
+            //int[] current_chord = GetFullChord(chords[chord_iter].pitch[0]);
+
+            //for(int i = 0; i < 4; i++)
+            //{
+            //    float num = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
+            //    Debug.Log(num);
+
+            //    if (Mathf.Abs( (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0]) < pitch_dif)
+            //    {
+            //        pitch_dif = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
+            //    }
+            //}
+            //Debug.Log(mh.pitch[0] + ", " + pitch_dif);
+            //mh.pitch[0] += pitch_dif;
+
+
+
+            //current_time += mh.length;
         }
 
         return melody;
@@ -593,10 +679,15 @@ public class MusicController : MonoBehaviour
 
         answer_2_chords[answer_2_chords.Count - 1].pitch[0] = 0;
 
-
         List<MidiHolder> basic_motif_melo = GetBasicMelody(max_phrase_length, basic_motif_chords);
         List<MidiHolder> answer_melo = GetBasicMelody(max_phrase_length, answer_chords);
         List<MidiHolder> answer_2_melo = GetBasicMelody(max_phrase_length, answer_2_chords);
+
+        basic_motif_melo = AlterMelodyToChords(basic_motif_melo, basic_motif_chords);
+        answer_melo = AlterMelodyToChords(answer_melo, answer_chords);
+        answer_2_melo = AlterMelodyToChords(answer_2_melo, answer_2_chords);
+
+        
 
         // Add basic Motif
         foreach (MidiHolder c in basic_motif_chords)

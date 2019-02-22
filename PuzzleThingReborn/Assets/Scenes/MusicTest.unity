@@ -332,7 +332,7 @@ MonoBehaviour:
   bufferSize: 1024
   midiNote: 60
   midiNoteVolume: 100
-  instrument: 1
+  instrument: 0
   midiInstrument: 33
 --- !u!82 &101399879
 AudioSource:
@@ -489,6 +489,8 @@ MonoBehaviour:
   bpm: 90
   markov: 1
   chords: 1
+  markov_offset: 0
+  chord_offset: 0
 --- !u!4 &271954214
 Transform:
   m_ObjectHideFlags: 0
@@ -602,7 +604,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &613586993
 AudioSource:
   m_ObjectHideFlags: 0
@@ -824,7 +826,7 @@ MonoBehaviour:
   musicObjects: []
   note_spawn_rate: 0
   rest_spawn_rate: 0
-  bpm: 120
+  bpm: 100
   scale_note: 9
   scale_type: 1
   time_sig_top: 4
@@ -1108,7 +1110,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &1514121237
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1263,7 +1265,9 @@ MonoBehaviour:
   midi_player: {fileID: 101399875}
   bpm: 90
   markov: 1
-  chords: 0
+  chords: 1
+  markov_offset: 1
+  chord_offset: 0
 --- !u!4 &1560182442
 Transform:
   m_ObjectHideFlags: 0
