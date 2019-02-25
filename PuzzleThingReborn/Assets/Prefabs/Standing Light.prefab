@@ -114,7 +114,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1629735322535172}
   m_LocalRotation: {x: -0, y: 0.13052596, z: -0, w: 0.99144495}
-  m_LocalPosition: {x: 85.75, y: 0, z: 6}
+  m_LocalPosition: {x: -27.043404, y: 17.703781, z: 16.719097}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4802907383608444}
@@ -261,7 +261,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 55296d1b6ee54e14e8eb4648d4b448ee, type: 2}
+  - {fileID: 2100000, guid: a17b347ad0ce52b4093ccdb116a328f5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -410,9 +410,9 @@ Light:
   serializedVersion: 8
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 3.29
+  m_Intensity: 1.5
   m_Range: 62.56
-  m_SpotAngle: 71.93818
+  m_SpotAngle: 65
   m_CookieSize: 10
   m_Shadows:
     m_Type: 1
@@ -6453,6 +6453,14 @@ MonoBehaviour:
     areaError: 15
   asset_guid: 
   dontDestroyMeshOnDelete: 0
-  m_selectedFaces: 
-  m_SelectedEdges: []
-  m_selectedTriangles: 
+  m_selectedFaces: 00000000
+  m_SelectedEdges:
+  - x: 0
+    y: 0
+  - x: 0
+    y: 0
+  - x: 0
+    y: 0
+  - x: 0
+    y: 0
+  m_selectedTriangles: 000000000000000000000000000000000000000000000000
