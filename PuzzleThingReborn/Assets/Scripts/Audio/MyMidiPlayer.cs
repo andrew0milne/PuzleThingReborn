@@ -44,6 +44,9 @@ public class MyMidiPlayer : MonoBehaviour
     List<MidiHolder>[] theme;
     int[] theme_counter;
 
+    float note_length = 0.0f;
+    float chord_length = 0.0f;
+
     //List<MidiHolder> melody;
     //int melody_counter = 0;
 
@@ -114,66 +117,78 @@ public class MyMidiPlayer : MonoBehaviour
     {
         if (AudioSettings.dspTime >= nextTickChords && chords)
         {
-            int num = theme_counter[0] - 1;
-            if (num < 0)
+            if (note_length >= theme[0][theme_counter[0]].length)
             {
-                num = theme[0].Count - 1;
+                int num = theme_counter[0] - 1;
+                if (num < 0)
+                {
+                    num = theme[0].Count - 1;
+                }
+
+
+
+                GetChord(theme[0][num].pitch[0], false);
+
+                //Debug.Log("root: " + theme[0][theme_counter[0]].pitch[0] );
+
+                GetChord(theme[0][theme_counter[0]].pitch[0], true);
+                //Debug.Log(theme[0][theme_counter[0]].pitch[0] + ", " + theme[0][theme_counter[0]].length);          
+
+                note_length = 0.0f;
+
+                theme_counter[0]++;
+                if (theme_counter[0] >= theme[0].Count)
+                {
+                    theme_counter[0] = 0;
+                }
             }
 
-            GetChord(theme[0][num].pitch[0], false);
-
-            //Debug.Log("root: " + theme[0][theme_counter[0]].pitch[0] );
-
-            GetChord(theme[0][theme_counter[0]].pitch[0], true);
-            //Debug.Log(theme[0][theme_counter[0]].pitch[0] + ", " + theme[0][theme_counter[0]].length);          
-
-            nextTickChords += (60.0f / (MusicController.instance.bpm / theme[0][theme_counter[0]].length));
-
-            theme_counter[0]++;
-            if (theme_counter[0] >= theme[0].Count)
-            {
-                theme_counter[0] = 0;
-            }
+            nextTickChords += MusicController.instance.time_step; //  (60.0f / (MusicController.instance.bpm / theme[0][theme_counter[0]].length));
+            note_length += MusicController.instance.shortest_note_length;
         }
+
 
         if (AudioSettings.dspTime >= nextTickMarkov && markov)
         {
 
-            if (last_note.pitch[0] != -1)
+            if (chord_length >= theme[1][theme_counter[1]].length)
             {
-                for (int i = 0; i < last_note.pitch.Count; i++)
+                if (last_note.pitch[0] != -1)
                 {
-                    midi_player.GetComponent<MIDIPlayer>().NoteOff(MusicController.instance.RoundNote(last_note.pitch[i]) + (12* markov_offset));// + MusicController.instance.GetRootNote());
+                    for (int i = 0; i < last_note.pitch.Count; i++)
+                    {
+                        midi_player.GetComponent<MIDIPlayer>().NoteOff(MusicController.instance.RoundNote(last_note.pitch[i]) + (12 * markov_offset));// + MusicController.instance.GetRootNote());
 
-                }
-            }
-
-            if (note.pitch[0] != -1)
-            {
-                for (int i = 0; i < note.pitch.Count; i++)
-                {
-
-                    //Debug.Log(MusicController.instance.RoundNote(note.pitch[i]) + MusicController.instance.GetRootNote());
-                    midi_player.GetComponent<MIDIPlayer>().NoteOn(MusicController.instance.RoundNote(note.pitch[i]) + (12* markov_offset));// + MusicController.instance.GetRootNote());
-
-                    //Debug.Log(MusicController.instance.GetNoteName(note.pitch[i]) + ", " + MusicController.instance.GetNoteName(MusicController.instance.RoundNote(note.pitch[i])));
-                    Debug.Log(MusicController.instance.GetNoteName(MusicController.instance.RoundNote(note.pitch[i])));// + MusicController.instance.GetRootNote()));
+                    }
                 }
 
+                if (note.pitch[0] != -1)
+                {
+                    for (int i = 0; i < note.pitch.Count; i++)
+                    {
 
+                        //Debug.Log(MusicController.instance.RoundNote(note.pitch[i]) + MusicController.instance.GetRootNote());
+                        midi_player.GetComponent<MIDIPlayer>().NoteOn(MusicController.instance.RoundNote(note.pitch[i]) + (12 * markov_offset));// + MusicController.instance.GetRootNote());
+
+                        //Debug.Log(MusicController.instance.GetNoteName(note.pitch[i]) + ", " + MusicController.instance.GetNoteName(MusicController.instance.RoundNote(note.pitch[i])));
+                        Debug.Log(MusicController.instance.GetNoteName(MusicController.instance.RoundNote(note.pitch[i])));// + MusicController.instance.GetRootNote()));
+                    }
+
+
+                }
+
+                last_note = note;
+
+                theme_counter[1]++;
+                if (theme_counter[1] >= theme[1].Count)
+                {
+                    theme_counter[1] = 0;
+                }
+                note = theme[1][theme_counter[1]];
             }
 
-            last_note = note;
-
-            theme_counter[1]++;
-            if(theme_counter[1] >= theme[1].Count)
-            {
-                theme_counter[1] = 0;
-            }
-            note = theme[1][theme_counter[1]];
-
-            nextTickMarkov += (60.0f / (MusicController.instance.bpm / note.length));
-
+            nextTickMarkov += MusicController.instance.time_step;// (60.0f / (MusicController.instance.bpm / note.length));
+            chord_length += MusicController.instance.shortest_note_length;
 
         }
 
