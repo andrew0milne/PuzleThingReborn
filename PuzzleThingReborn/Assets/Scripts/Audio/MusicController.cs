@@ -4,7 +4,9 @@ using UnityEngine;
 
 
 
-public enum ScaleType { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
+//public enum ScaleType { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
+public enum ScaleType { LYDIAN, MAJOR, MIXOLYDIAN, DORIAN, MINOR, PHRYGIAN, LOCRIAN };
+
 public enum ScaleNote { C, C_Sharp, D, D_Sharp, E, F, F_Sharp, G, G_Sharp, A, A_Sharp, B, };
 
 public class Chord : ScriptableObject
@@ -34,6 +36,7 @@ public class MusicController : MonoBehaviour
 
     public ScaleNote scale_note;
     public ScaleType scale_type;
+    public int scale_type_num;
 
     public int time_sig_top = 4;
     public int time_sig_bottom = 4;
@@ -53,6 +56,8 @@ public class MusicController : MonoBehaviour
     MidiReader reader_script;
 
     List<DependHolder> freq;
+
+    
 
     private void Awake()
     {
@@ -127,6 +132,7 @@ public class MusicController : MonoBehaviour
             Debug.Log(scale[i] + "-->"+ GetNoteName(scale[i]));
         }
 
+        //scale_type = (ScaleType)num;
     }
 
     IEnumerator SetUp()
@@ -151,12 +157,21 @@ public class MusicController : MonoBehaviour
         yield return null;
     }
 
+    public void UpdateScales(ScaleType st, ScaleNote sn)
+    {
+        scale_note = sn;
+        scale_type = st;
+
+        scale_type_num = (int)st;
+    }
 
     // Return the notes of the current scale
     // In semitones
     public int[] GetScale()
     {
         int[] scale;
+
+        scale_type = (ScaleType)scale_type_num;
 
         switch (scale_type)
         {
@@ -181,9 +196,9 @@ public class MusicController : MonoBehaviour
             case ScaleType.LOCRIAN:
                 scale = new int[7] { 0, 1, 3, 5, 6, 8, 10 };
                 break;
-            case ScaleType.PENTATONIC:
-                scale = new int[7] { 0, 2, 4, 0, 7, 9, 12 };
-                break;
+            //case ScaleType.PENTATONIC:
+                //scale = new int[7] { 0, 2, 4, 0, 7, 9, 12 };
+                //break;
             default:
                 scale = new int[7] { 0, 2, 3, 5, 7, 8, 10 };
                 break;
@@ -785,18 +800,45 @@ public class MusicController : MonoBehaviour
     //}
 
     // Update is called once; per frame
+
+    void UpdateMode(bool direction)
+    {
+
+    }
+
     void Update ()
     {
         time_step = 60.0f/(bpm / shortest_note_length);
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            bpm += Time.deltaTime * 10.0f;
+                //bpm += Time.deltaTime * 10.0f;
+             if(scale_type_num < 6)
+             {
+                scale_type_num++;
+             }
+
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            bpm -= Time.deltaTime * 10.0f;
+            //bpm -= Time.deltaTime * 10.0f;
+            if (scale_type_num > 0)
+            {
+                scale_type_num--;
+            }
         }
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            bpm -= Time.deltaTime * 10.0f;   
+
+        }
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            bpm += Time.deltaTime * 10.0f;         
+        }
+
+
     }
 
     float RoundToDecimanl(float number, float deciml, bool can_be_zero)

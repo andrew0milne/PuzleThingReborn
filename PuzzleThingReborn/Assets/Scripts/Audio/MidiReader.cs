@@ -152,8 +152,10 @@ public class MidiReader : MonoBehaviour
     {
         //Debug.Log(Application.dataPath + "/Audio/Midi Files/" + midi_file_name + ".mid");
 
-        MusicController.instance.scale_note = og_scale_note;
-        MusicController.instance.scale_type = og_scale_type;
+        //MusicController.instance.scale_note = og_scale_note;
+        //MusicController.instance.scale_type = og_scale_type;
+
+        MusicController.instance.UpdateScales(og_scale_type, og_scale_note);
 
         scale_root = MusicController.instance.GetRootNote();
 

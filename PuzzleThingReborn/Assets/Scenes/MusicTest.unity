@@ -604,7 +604,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &613586993
 AudioSource:
   m_ObjectHideFlags: 0
@@ -826,9 +826,10 @@ MonoBehaviour:
   musicObjects: []
   note_spawn_rate: 0
   rest_spawn_rate: 0
-  bpm: 100
+  bpm: 120
   scale_note: 9
   scale_type: 1
+  scale_type_num: 0
   time_sig_top: 4
   time_sig_bottom: 4
   midi_file_name: 
@@ -1110,7 +1111,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!82 &1514121237
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1264,7 +1265,7 @@ MonoBehaviour:
   midi_reader: {fileID: 1869720424}
   midi_player: {fileID: 101399875}
   bpm: 90
-  markov: 1
+  markov: 0
   chords: 1
   markov_offset: 0
   chord_offset: 1
@@ -1653,7 +1654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1443995fc71dfe4b9771b9e0c4a15ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  midi_file_name: hysteria
+  midi_file_name: king
   og_scale_note: 9
   og_scale_type: 1
   channel: 0
