@@ -167,6 +167,7 @@ public class MyMidiPlayer : MonoBehaviour
     //    }
     //}
 
+
     float RoundToDecimanl(float number, float deciml, bool can_be_zero)
     {
         float d = 1 / deciml;
