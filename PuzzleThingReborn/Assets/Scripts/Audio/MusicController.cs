@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
-//public enum ScaleType { MAJOR, MINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, LOCRIAN, PENTATONIC };
 public enum ScaleType { LYDIAN, MAJOR, MIXOLYDIAN, DORIAN, MINOR, PHRYGIAN, LOCRIAN };
 
 public enum ScaleNote { C, C_Sharp, D, D_Sharp, E, F, F_Sharp, G, G_Sharp, A, A_Sharp, B, };
@@ -41,8 +39,6 @@ public class MusicController : MonoBehaviour
     public int time_sig_top = 4;
     public int time_sig_bottom = 4;
 
-    public string midi_file_name;
-
     public float shortest_note_length = 0.25f;
 
     public float time_step;
@@ -57,7 +53,20 @@ public class MusicController : MonoBehaviour
 
     List<DependHolder> freq;
 
-    
+    public bool change_bpm = true;
+
+    public float min_bpm = 80.0f;
+    public float max_bpm = 150.0f;
+
+    public float min_dist = 1.0f;
+    public float max_dist = 10.0f;
+
+    public GameObject player;
+    public GameObject enemy;
+
+    public int song_number = 0;
+
+    public float intensity = 0.0f;
 
     private void Awake()
     {
@@ -123,7 +132,7 @@ public class MusicController : MonoBehaviour
 
         reader_script = midi_reader.GetComponent<MidiReader>();
         reader_script.ReadInMidi();
-        freq = reader_script.FreqDistribution();
+        freq = reader_script.FreqDistribution(song_number);
 
         int[]scale =GetScale();
 
@@ -133,6 +142,19 @@ public class MusicController : MonoBehaviour
         }
 
         //scale_type = (ScaleType)num;
+    }
+
+    void UpdateBPM()
+    {
+        float distance = Vector3.Distance(player.transform.position, enemy.transform.position);
+
+        intensity = (distance - min_dist) / max_dist;
+
+        intensity = Mathf.Clamp(intensity, 0.0f, 1.0f);
+
+        intensity = 1.0f - intensity;
+
+        bpm = Mathf.Lerp(min_bpm, max_bpm, intensity);
     }
 
     IEnumerator SetUp()
@@ -155,6 +177,11 @@ public class MusicController : MonoBehaviour
         Debug.Log("Go");
 
         yield return null;
+    }
+
+    public int GetNumberOfSongs()
+    {
+        return midi_reader.GetComponent<MidiReader>().midi_files.Length;
     }
 
     public void UpdateScales(ScaleType st, ScaleNote sn)
@@ -446,29 +473,6 @@ public class MusicController : MonoBehaviour
         return final_note;// + base_note;
     }
 
-    //public string [] GetNotes(int note_count)
-    //{
-    //    string[] beats = new string[note_count];
-
-    //    int[] current_scale = GetScale();
-
-    //    for(int i = 0; i < note_count; i++)
-    //    {
-    //        // If true make a note
-    //        if(Random.Range(0.0f, 1.0f) >= rest_spawn_rate)
-    //        {
-    //            beats[i] = notes[current_scale[(int)Random.Range(0, 7)]];
-    //        }
-    //        else
-    //        {
-    //            beats[i] = "";
-    //        }
-    //    }
-
-    //    return beats;
-    //}
-
-   
 
     public int GetNextChord(int chords_name)
     {
@@ -489,7 +493,7 @@ public class MusicController : MonoBehaviour
     List<MidiHolder> GetBasicScale(int chords_per_phrase, float length_min, float length_max, float max_phrase_length)
     {
         List<MidiHolder> basic_scale = new List<MidiHolder>();
-        MidiHolder first = new MidiHolder();
+        MidiHolder first = ScriptableObject.CreateInstance <MidiHolder>();
         float len = Random.Range(length_min, length_max);
         len = RoundToDecimanl(len, shortest_note_length * 2.0f, false);
 
@@ -503,7 +507,7 @@ public class MusicController : MonoBehaviour
         for (int i = 1; i < chords_per_phrase - 1; i++)
         {
 
-            MidiHolder temp = new MidiHolder();
+            MidiHolder temp = ScriptableObject.CreateInstance <MidiHolder>();
             float length = Random.Range(length_min, length_max);
             length = RoundToDecimanl(length, shortest_note_length * 2.0f, false);
 
@@ -522,7 +526,7 @@ public class MusicController : MonoBehaviour
 
         if (length_left > 0)
         {
-            MidiHolder last = new MidiHolder();
+            MidiHolder last = ScriptableObject.CreateInstance <MidiHolder>();
             last.Init(GetNextChord(basic_scale[basic_scale.Count - 1].pitch[0]), length_left);
             basic_scale.Add(last);
         }
@@ -532,14 +536,14 @@ public class MusicController : MonoBehaviour
         return basic_scale;
     }
 
-    List<MidiHolder> GetBasicMelody(float max_phrase_length, List<MidiHolder> chords)
+    List<MidiHolder> GetBasicMelody(float max_phrase_length, List<MidiHolder> chords, int song_number)
     {
         List<MidiHolder> melody = new List<MidiHolder>();
         float length_left = max_phrase_length;
 
         bool found_note = false;
 
-        MidiHolder first = reader_script.GetFirstNote();
+        MidiHolder first = reader_script.GetFirstNote(song_number);
 
         for(int i = 0; i < 3; i++)
         {
@@ -602,7 +606,7 @@ public class MusicController : MonoBehaviour
 
         while(length_left >= 0)
         {
-            melody.Add(reader_script.GetNote(freq, melody[melody.Count - 1]));
+            melody.Add(reader_script.GetNote(freq, melody[melody.Count - 1], song_number));
             length_left -= melody[melody.Count - 1].length;
         }
 
@@ -629,56 +633,56 @@ public class MusicController : MonoBehaviour
 
 
 
-    List<MidiHolder> AlterMelodyToChords(List<MidiHolder> melody, List<MidiHolder> chords)
-    {
-        float current_time = 0.0f;
+    //List<MidiHolder> AlterMelodyToChords(List<MidiHolder> melody, List<MidiHolder> chords)
+    //{
+    //    float current_time = 0.0f;
 
-        int chord_iter = 0;
+    //    int chord_iter = 0;
 
-        foreach(MidiHolder mh in melody)
-        {
-            mh.pitch[0] += GetRootNote();
+    //    foreach(MidiHolder mh in melody)
+    //    {
+    //        mh.pitch[0] += GetRootNote();
 
-            //int chord_pitch_dif = PitchShiftDegree(mh.pitch[0]);
-            //int pitch_dif = 10000;
+    //        //int chord_pitch_dif = PitchShiftDegree(mh.pitch[0]);
+    //        //int pitch_dif = 10000;
 
-            //if(current_time >= chords[chord_iter].length)
-            //{
-            //    current_time = 0.0f;
-            //    chord_iter++;
-            //}
+    //        //if(current_time >= chords[chord_iter].length)
+    //        //{
+    //        //    current_time = 0.0f;
+    //        //    chord_iter++;
+    //        //}
 
-            //if(chord_iter >= chords.Count)
-            //{
-            //    break;
-            //}
-            ////Debug.Log("iter " + chord_iter);
+    //        //if(chord_iter >= chords.Count)
+    //        //{
+    //        //    break;
+    //        //}
+    //        ////Debug.Log("iter " + chord_iter);
 
-            ////Get the actual chord based of time
-            //int[] current_chord = GetFullChord(chords[chord_iter].pitch[0]);
+    //        ////Get the actual chord based of time
+    //        //int[] current_chord = GetFullChord(chords[chord_iter].pitch[0]);
 
-            //for(int i = 0; i < 4; i++)
-            //{
-            //    float num = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
-            //    Debug.Log(num);
+    //        //for(int i = 0; i < 4; i++)
+    //        //{
+    //        //    float num = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
+    //        //    Debug.Log(num);
 
-            //    if (Mathf.Abs( (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0]) < pitch_dif)
-            //    {
-            //        pitch_dif = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
-            //    }
-            //}
-            //Debug.Log(mh.pitch[0] + ", " + pitch_dif);
-            //mh.pitch[0] += pitch_dif;
+    //        //    if (Mathf.Abs( (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0]) < pitch_dif)
+    //        //    {
+    //        //        pitch_dif = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
+    //        //    }
+    //        //}
+    //        //Debug.Log(mh.pitch[0] + ", " + pitch_dif);
+    //        //mh.pitch[0] += pitch_dif;
 
 
 
-            //current_time += mh.length;
-        }
+    //        //current_time += mh.length;
+    //    }
 
-        return melody;
-    }
+    //    return melody;
+    //}
 
-    public List<MidiHolder>[] GetTheme(bool scentence, int chords_per_phrase, float length_min, float length_max, float max_phrase_length)
+    public List<MidiHolder>[] GetTheme(bool scentence, int chords_per_phrase, float length_min, float length_max, float max_phrase_length, int song_number)
     {
         List<MidiHolder>[] scale_progression = new List<MidiHolder>[2];
 
@@ -688,21 +692,25 @@ public class MusicController : MonoBehaviour
         }
 
 
+        Debug.Log("Creating Chord sequence...");
         List<MidiHolder> basic_motif_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
         List<MidiHolder> answer_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
         List<MidiHolder> answer_2_chords = GetBasicScale(chords_per_phrase, length_min, length_max, max_phrase_length);
+        Debug.Log("Finished Chord sequence...");
 
         answer_2_chords[answer_2_chords.Count - 1].pitch[0] = 0;
 
-        List<MidiHolder> basic_motif_melo = GetBasicMelody(max_phrase_length, basic_motif_chords);
-        List<MidiHolder> answer_melo = GetBasicMelody(max_phrase_length, answer_chords);
-        List<MidiHolder> answer_2_melo = GetBasicMelody(max_phrase_length, answer_2_chords);
+        Debug.Log("Creating Melodic sequence...");
+        List<MidiHolder> basic_motif_melo = GetBasicMelody(max_phrase_length, basic_motif_chords, song_number);
+        List<MidiHolder> answer_melo = GetBasicMelody(max_phrase_length, answer_chords, song_number);
+        List<MidiHolder> answer_2_melo = GetBasicMelody(max_phrase_length, answer_2_chords, song_number);
+        Debug.Log("Finished Melodic sequence...");
 
-        basic_motif_melo = AlterMelodyToChords(basic_motif_melo, basic_motif_chords);
-        answer_melo = AlterMelodyToChords(answer_melo, answer_chords);
-        answer_2_melo = AlterMelodyToChords(answer_2_melo, answer_2_chords);
+        //basic_motif_melo = AlterMelodyToChords(basic_motif_melo, basic_motif_chords);
+        //answer_melo = AlterMelodyToChords(answer_melo, answer_chords);
+        //answer_2_melo = AlterMelodyToChords(answer_2_melo, answer_2_chords);
 
-        
+
 
         // Add basic Motif
         foreach (MidiHolder c in basic_motif_chords)
@@ -801,9 +809,9 @@ public class MusicController : MonoBehaviour
 
     // Update is called once; per frame
 
-    void UpdateMode(bool direction)
+    public MidiHolder GetNote(MidiHolder note, int song_number)
     {
-
+        return reader_script.GetNote(freq, note, song_number);
     }
 
     void Update ()
@@ -838,7 +846,15 @@ public class MusicController : MonoBehaviour
             bpm += Time.deltaTime * 10.0f;         
         }
 
+        if (change_bpm)
+        {
+            UpdateBPM();
+        }
 
+        //if(change_melody)
+        //{
+            
+        //}
     }
 
     float RoundToDecimanl(float number, float deciml, bool can_be_zero)

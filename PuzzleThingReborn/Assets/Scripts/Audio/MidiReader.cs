@@ -6,12 +6,13 @@ using NAudio.Midi;
 using NAudio.Wave.SampleProviders;
 using NAudio.Wave;
 
-public class MidiHolder : MonoBehaviour
+public class MidiHolder : ScriptableObject
 {
     public List<int> pitch;
     public long bar;
     public float beat;
     public float length;
+    public float og_length;
     public float time;
 
     public void Init(int p, long br, float bt, float l, float t)
@@ -21,6 +22,7 @@ public class MidiHolder : MonoBehaviour
         bar = br;
         beat = bt;
         length = l;
+        og_length = l;
         time = t;
 
         //name = "" + pitch + time;
@@ -39,7 +41,7 @@ public class MidiHolder : MonoBehaviour
     }
 }
 
-public class NextNote: MonoBehaviour
+public class NextNote: ScriptableObject
 {
     public MidiHolder note;
     public int freq;
@@ -49,9 +51,9 @@ public class NextNote: MonoBehaviour
         note.Print();
         Debug.Log(freq);
     }
-}
+} 
 
-public class DependHolder : MonoBehaviour
+public class DependHolder : ScriptableObject
 {
     public MidiHolder note;
     public List<NextNote> next_note;
@@ -85,7 +87,7 @@ public class DependHolder : MonoBehaviour
         // A new combination
         if (!found)
         {
-            NextNote temp_note = new NextNote();
+            NextNote temp_note = ScriptableObject.CreateInstance <NextNote>();
             temp_note.note = new_note;
             temp_note.freq = 1;
 
@@ -112,10 +114,27 @@ public class DependHolder : MonoBehaviour
     }
 }
 
+public class Theme: ScriptableObject
+{
+    public List<MidiHolder>[] theme;
+
+    void Init()
+    {
+
+    }
+}
+
+[System.Serializable]
+public struct MidiFileInput
+{
+    public string name;
+    public int channel;
+}
+
 public class MidiReader : MonoBehaviour
 {
 
-    public string midi_file_name;
+    public MidiFileInput[] midi_files;
     public ScaleNote og_scale_note;
     public ScaleType og_scale_type;
 
@@ -127,7 +146,7 @@ public class MidiReader : MonoBehaviour
     int number_of_channels;
     const int max_channels = 16;
 
-    public int channel = 0;
+   
 
     public GameObject cube;
 
@@ -159,9 +178,9 @@ public class MidiReader : MonoBehaviour
 
         scale_root = MusicController.instance.GetRootNote();
 
-        midi_holder = new List<MidiHolder>[max_channels];
+        midi_holder = new List<MidiHolder>[midi_files.Length];
 
-        for (int i = 0; i < max_channels; i++)
+        for (int i = 0; i < midi_files.Length; i++)
         {
             midi_holder[i] = new List<MidiHolder>();
         }
@@ -181,71 +200,73 @@ public class MidiReader : MonoBehaviour
 
     public void ReadInMidi()
     {
-        // Gets the MIDI file
-        midi_file = new MidiFile(Application.dataPath + "/Audio/Midi Files/" + midi_file_name + ".mid");
-
-        MidiEventCollection midi_events = midi_file.Events;
-
-        // Gets all the midi notes
-        for (int n = 0; n < midi_file.Tracks; n++)
+        for (int j = 0; j < midi_files.Length; j++)
         {
-            foreach (var midiEvent in midi_file.Events[n])
-            {
+            // Gets the MIDI file
+            midi_file = new MidiFile(Application.dataPath + "/Audio/Midi Files/" + midi_files[j].name + ".mid");
+
+            MidiEventCollection midi_events = midi_file.Events;
+
+            Debug.Log(midi_file);
+
+            // Gets all the midi notes
+            
+            foreach (var midiEvent in midi_events[midi_files[j].channel])
+            {            
                 if (MidiEvent.IsNoteOn(midiEvent))
                 {
-                    ToMBT((NoteEvent)midiEvent, midiEvent.AbsoluteTime, midi_file.DeltaTicksPerQuarterNote, null);
+                    ConvertEvent((NoteEvent)midiEvent, midiEvent.AbsoluteTime, midi_file.DeltaTicksPerQuarterNote, null, j);
                 }
             }
-        }
-
         
-        for (int i = 0; i < 16; i++)
-        {
-            CleanUp(i);
+            //for (int i = 0; i < midi_file_name.Length; i++)
+            //{
+            CleanUp(j);         
 
-            if (generate_visualiser)
+                //if (generate_visualiser)
+                //{
+                //    foreach (MidiHolder mh in midi_holder[i])
+                //    {
+                //        //mh.Print();
+                //
+                //        for (int p = 0; p < mh.pitch.Count; p++)
+                //        {
+                //            GameObject temp = Instantiate(cube, new Vector3(mh.time, mh.pitch[p] / 10.0f, 0.0f), Quaternion.identity, parents[i].transform);
+                //
+                //            //temp.GetComponent<SoundBlock>().Init(mh.pitch);
+                //            temp.transform.localScale = new Vector3(mh.length, 0.5f, 1.0f);
+                //            temp.transform.position += new Vector3(mh.length / 2.0f, 0.0f, i * 1.0f);
+                //
+                //            Color colour = Color.blue;
+                //
+                //            if (mh.pitch[0] == -1)
+                //            {
+                //                //temp.transform.localScale = new Vector3(mh.length * 2.0f, 5.0f, 1.0f);
+                //                temp.transform.position = new Vector3(temp.transform.position.x, 6.0f, temp.transform.position.z + 0.1f);
+                //                colour = Color.black;
+                //                //Destroy(temp.GetComponent<Rigidbody>());
+                //            }
+                //
+                //            temp.GetComponent<Renderer>().material.color = colour;
+                //        }
+                //    }
+                //}
+            //}
+
+            foreach (MidiHolder mh in midi_holder[j])
             {
-                foreach (MidiHolder mh in midi_holder[i])
+
+                if (mh.pitch[0] != -1)
                 {
-                    //mh.Print();
-
-                    for (int p = 0; p < mh.pitch.Count; p++)
-                    {
-                        GameObject temp = Instantiate(cube, new Vector3(mh.time, mh.pitch[p] / 10.0f, 0.0f), Quaternion.identity, parents[i].transform);
-
-                        //temp.GetComponent<SoundBlock>().Init(mh.pitch);
-                        temp.transform.localScale = new Vector3(mh.length, 0.5f, 1.0f);
-                        temp.transform.position += new Vector3(mh.length / 2.0f, 0.0f, i * 1.0f);
-
-                        Color colour = Color.blue;
-
-                        if (mh.pitch[0] == -1)
-                        {
-                            //temp.transform.localScale = new Vector3(mh.length * 2.0f, 5.0f, 1.0f);
-                            temp.transform.position = new Vector3(temp.transform.position.x, 6.0f, temp.transform.position.z + 0.1f);
-                            colour = Color.black;
-                            //Destroy(temp.GetComponent<Rigidbody>());
-                        }
-
-                        temp.GetComponent<Renderer>().material.color = colour;
-                    }
+                    first_note = mh;
+                    break;
                 }
             }
         }
-
-        foreach(MidiHolder mh in midi_holder[channel])
-        {
-            
-            if (mh.pitch[0] != -1)
-            {
-                first_note = mh;
-                break;
-            }
-        }
-
     }
 
-    float RoundToDecimanl(float number, float deciml, bool can_be_zero)
+    
+    public float RoundToDecimal(float number, float deciml, bool can_be_zero)
     {
         float d = 1 / deciml;
         float num = Mathf.Round(number * d) / d;
@@ -257,7 +278,7 @@ public class MidiReader : MonoBehaviour
         return num;
     }
 
-    private void ToMBT(NoteEvent note, long eventTime, int ticksPerQuarterNote, TimeSignatureEvent timeSignature)
+    private void ConvertEvent(NoteEvent note, long eventTime, int ticksPerQuarterNote, TimeSignatureEvent timeSignature, int midi_file)
     {
         int beatsPerBar;
         int ticksPerBar;
@@ -267,6 +288,7 @@ public class MidiReader : MonoBehaviour
         long tick;
         float time;
 
+       
         string s = note.ToString();
 
         string len = "Len: ";
@@ -286,17 +308,17 @@ public class MidiReader : MonoBehaviour
 
             float temp_length = (int.Parse(s.Substring(num)) / (float)ticksPerQuarterNote);
 
-            MidiHolder temp_midi = new MidiHolder();
+            MidiHolder temp_midi = ScriptableObject.CreateInstance<MidiHolder>();// new MidiHolder();
 
             // Round to nearest 0.25
-            temp_length = RoundToDecimanl(temp_length, MusicController.instance.shortest_note_length, false);
+            temp_length = RoundToDecimal(temp_length, MusicController.instance.shortest_note_length, false);
 
-            time = RoundToDecimanl(time, MusicController.instance.shortest_note_length, true);
+            time = RoundToDecimal(time, MusicController.instance.shortest_note_length, true);
 
             temp_midi.Init(note.NoteNumber - scale_root, bar, beat, temp_length, time);
             //temp_midi.Print();
 
-            midi_holder[note.Channel - 1].Add(temp_midi);
+            midi_holder[midi_file].Add(temp_midi);
 
             if (note.Channel > number_of_channels)
             {
@@ -314,7 +336,8 @@ public class MidiReader : MonoBehaviour
     // - Combines notes that occur at the same time (chords)
     // - Adds an event for sections with no notes (rests)
     public void CleanUp(int channel)
-    {
+    {      
+        
         // Iterates through midi events
         for (int i = 0; i < midi_holder[channel].Count - 1; i++)
         {
@@ -325,7 +348,7 @@ public class MidiReader : MonoBehaviour
             // makes a rest
             if (current.time + current.length != next.time && current.time != next.time)
             {
-                MidiHolder rest = new MidiHolder();
+                MidiHolder rest =  ScriptableObject.CreateInstance<MidiHolder>();
                 float new_length = next.time - (current.time + current.length);
                 float new_time = current.time + current.length;
                 rest.Init(-1 , -1, -1, new_length, new_time);
@@ -347,7 +370,7 @@ public class MidiReader : MonoBehaviour
             MidiHolder current = midi_holder[channel][i];
             MidiHolder next = midi_holder[channel][i + 1];
 
-            MidiHolder temp = new MidiHolder();
+            MidiHolder temp = ScriptableObject.CreateInstance<MidiHolder>();
             temp.Init(current.pitch[0], current.bar, current.beat, current.length, current.time);
 
             float time = next.time;
@@ -382,48 +405,71 @@ public class MidiReader : MonoBehaviour
 
     }
 
-    bool CheckNotes(MidiHolder mh1, MidiHolder mh2)
+    bool CheckNotes(MidiHolder mh1, MidiHolder mh2, bool check_length)
     {
-        if (mh1.pitch.Count == mh2.pitch.Count && mh1.length == mh2.length)
+        if (check_length)
         {
-            for (int i = 0; i < mh1.pitch.Count; i++)
+            if (mh1.pitch.Count == mh2.pitch.Count && mh1.og_length == mh2.og_length)
             {
-                if (mh1.pitch[i] != mh2.pitch[i])
+                for (int i = 0; i < mh1.pitch.Count; i++)
                 {
-                    return false;
+                    if (mh1.pitch[i] != mh2.pitch[i])
+                    {
+                        return false;
+                    }
                 }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
+        else
+        {
+            if (mh1.pitch.Count == mh2.pitch.Count)
+            {
+                for (int i = 0; i < mh1.pitch.Count; i++)
+                {
+                    if (mh1.pitch[i] != mh2.pitch[i])
+                    {
+                        return false;
+                    }
+                }
 
-        return false;
+                return true;
+            }
+
+            return false;
+        }
     }
 
-    public MidiHolder GetFirstNote()
+    public MidiHolder GetFirstNote(int song_number)
     {
-       
-        return midi_holder[channel][0];
 
-        //return first_note.pitch;
+        Debug.Log("midi_holder " + midi_holder[song_number].Count);
+        Debug.Log("Song number " + song_number);
+
+        return midi_holder[song_number][0];
+
+
     }
 
-    public List<DependHolder> FreqDistribution()
+    public List<DependHolder> FreqDistribution(int song_number)
     {
-        List<DependHolder> freq_distribution = new List<DependHolder>();
+        List<DependHolder>freq_distribution = new List<DependHolder>();
 
         // Creates the frequency distribution
-        for (int i = 0; i < midi_holder[channel].Count - 2; i++)
+        for (int i = 0; i < midi_holder[song_number].Count - 2; i++)
         {
             bool found = false;
 
             // Checks to see if the current note sequence has been found before
             foreach (DependHolder dh in freq_distribution)
             {
-                if (CheckNotes(midi_holder[channel][i], dh.note))
+                if (CheckNotes(midi_holder[song_number][i], dh.note, true))
                 {
                     found = true;
-                    dh.AddNote(midi_holder[channel][i + 1]);
+                    dh.AddNote(midi_holder[song_number][i + 1]);
                     break;
                 }
             }
@@ -431,10 +477,10 @@ public class MidiReader : MonoBehaviour
             // If note create a new note sequence and add it the the distribution list
             if (!found)
             {
-                DependHolder temp_holder = new DependHolder();
-                temp_holder.Init(midi_holder[channel][i]);
+                DependHolder temp_holder = ScriptableObject.CreateInstance<DependHolder>();
+                temp_holder.Init(midi_holder[song_number][i]);
 
-                temp_holder.AddNote(midi_holder[channel][i + 1]);
+                temp_holder.AddNote(midi_holder[song_number][i + 1]);
 
                 freq_distribution.Add(temp_holder);
             }
@@ -453,13 +499,13 @@ public class MidiReader : MonoBehaviour
     {
         foreach (DependHolder dh in freq)
         {
-            if (CheckNotes(previous_note, dh.note))
+            if (CheckNotes(previous_note, dh.note, true))
             {
                 foreach(NextNote nn in dh.next_note)
                 {
                     if(MusicController.instance.IsInChord(nn.note.pitch[0], chord_root))
                     {
-                        MidiHolder new_note = new MidiHolder();
+                        MidiHolder new_note = ScriptableObject.CreateInstance<MidiHolder>();
                         new_note.pitch = nn.note.pitch;
                         new_note.length = nn.note.length;
 
@@ -477,7 +523,7 @@ public class MidiReader : MonoBehaviour
         {
             if(MusicController.instance.IsInChord(dh.note.pitch[0], chord_root))
             {
-                MidiHolder new_note = new MidiHolder();
+                MidiHolder new_note = ScriptableObject.CreateInstance <MidiHolder>();
                 new_note.pitch = dh.note.pitch;
                 new_note.length = dh.note.length;
 
@@ -487,7 +533,7 @@ public class MidiReader : MonoBehaviour
 
         Debug.Log("ERROR: NO NOTE GENERATED, GENERATING BASE NOTE");
 
-        MidiHolder note = new MidiHolder();
+        MidiHolder note = ScriptableObject.CreateInstance <MidiHolder>();
         note.pitch = new List<int>();
         int[] scale = MusicController.instance.GetScale();
         note.pitch.Add(scale[chord_root]);
@@ -496,63 +542,78 @@ public class MidiReader : MonoBehaviour
         return note;
     }
 
-    public MidiHolder GetNote(List<DependHolder> freq, MidiHolder previous_note)
+    public MidiHolder GetNote(List<DependHolder> freq, MidiHolder previous_note, int song_number)
     {
         //Debug.Log("Get next note");
 
-        foreach (DependHolder dh in freq)
+        bool check_length = true;
+
+        for (int i = 0; i < 2; i++)
         {
-            if (CheckNotes(previous_note, dh.note))
+            foreach (DependHolder dh in freq)
             {
-                int random = Random.Range(0, dh.max_freq);
-                int p = 0;
-
-                foreach (NextNote nn in dh.next_note)
+                if (CheckNotes(previous_note, dh.note, check_length))
                 {
-                    p += nn.freq;
+                    Debug.Log(dh.note.pitch[0] + ", " + dh.note.length);
 
-                    //Debug.Log(p + " >= " + random + "?");
+                    int random = Random.Range(0, dh.max_freq);
+                    int p = 0;
 
-
-
-                    if (p >= random)
+                    foreach (NextNote nn in dh.next_note)
                     {
-                        //Debug.Log("yes");
+                        p += nn.freq;
 
-                        MidiHolder new_note = new MidiHolder();
-                        new_note.pitch = nn.note.pitch;
-                        new_note.length = nn.note.length;
+                        //Debug.Log(p + " >= " + random + "?");
 
-                        return new_note;                     
+                        if (p >= random)
+                        {
+                            //Debug.Log("yes");
+
+                            MidiHolder new_note = ScriptableObject.CreateInstance<MidiHolder>();
+                            new_note.pitch = nn.note.pitch;
+                            new_note.length = nn.note.length;
+
+                            return new_note;
+                        }
+                        //Debug.Log("no");
                     }
-                    //Debug.Log("no");
+
+                    break;
                 }
-
-                break;
             }
+            
+
+            
+            Debug.Log("WARNING: NOTE " + previous_note.pitch[0] + ", " + previous_note.length );
+
+            if (check_length)
+            {
+                Debug.Log("WARNING: NO NOTE GENERATED, RETRYING WITHOUT NOTE LENGTH");
+            }
+
+            check_length = false;
         }
+        Debug.Log("WARNING: NO NOTE GENERATED, RESTARTING MARKOV");
 
-        Debug.Log("ERROR: NO NOTE GENERATED, RESTARTING MARKOV");
-
-        MidiHolder note = new MidiHolder();
-        note = GetFirstNote();
+        MidiHolder note = ScriptableObject.CreateInstance <MidiHolder>();
+        note = GetFirstNote(song_number);
         //note.length = MusicController.instance.shortest_note_length;
 
         return note;
     }
 
-    List<MidiHolder> Markov()
+    List<MidiHolder> Markov(int song_number)
     {
         List<MidiHolder> markov_midi = new List<MidiHolder>();
         List<DependHolder> freq_distribution = new List<DependHolder>();
 
-        freq_distribution = FreqDistribution();
+        freq_distribution = FreqDistribution(song_number);
 
         markov_midi.Add(midi_holder[0][0]);
 
         for (int i = 0; i < notes_to_make; i++)
         {
-            MidiHolder new_note = GetNote(freq_distribution, markov_midi[markov_midi.Count - 1]);
+            MidiHolder new_note = GetNote(freq_distribution, markov_midi[markov_midi.Count - 1], song_number);
 
             if(new_note != null)
             {
