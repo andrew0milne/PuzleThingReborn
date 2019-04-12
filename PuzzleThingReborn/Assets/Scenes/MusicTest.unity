@@ -1977,7 +1977,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   midi_files:
   - name: king3
-    channel: 2
+    channel: 1
   og_scale_note: 9
   og_scale_type: 4
   cube: {fileID: 1045800146569276, guid: f8933adcecdee4d46ae93b83c843864f, type: 2}

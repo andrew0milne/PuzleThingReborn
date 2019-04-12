@@ -48,8 +48,8 @@ public class NextNote: ScriptableObject
 
     public void Print()
     {
-        note.Print();
-        Debug.Log(freq);
+        //note.Print();
+        //Debug.Log(freq);
     }
 } 
 
@@ -75,7 +75,7 @@ public class DependHolder : ScriptableObject
         // Checks if the combination has already occured
         foreach (NextNote nn in next_note)
         {
-            if (new_note.pitch == nn.note.pitch && new_note.length == nn.note.length)
+            if (CheckNotes(new_note, nn.note))
             {
                 // The combination has occured
                 nn.freq++;
@@ -93,6 +93,24 @@ public class DependHolder : ScriptableObject
 
             next_note.Add(temp_note);
         }
+    }
+
+    bool CheckNotes(MidiHolder mh1, MidiHolder mh2)
+    {       
+        if (mh1.pitch.Count == mh2.pitch.Count && mh1.og_length == mh2.og_length)
+        {
+            for (int i = 0; i < mh1.pitch.Count; i++)
+            {
+                if (mh1.pitch[i] != mh2.pitch[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;      
     }
 
     public void SumFreq()
