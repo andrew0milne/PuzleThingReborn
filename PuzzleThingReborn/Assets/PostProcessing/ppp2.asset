@@ -83,7 +83,7 @@ MonoBehaviour:
       sampleCount: 11
       frameBlending: 1
   eyeAdaptation:
-    m_Enabled: 1
+    m_Enabled: 0
     m_Settings:
       lowPercent: 29.88326
       highPercent: 79.8833

@@ -8,10 +8,10 @@ public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
 
-    public GameObject contact_point;
+    //public GameObject contact_point;
 
     [SerializeField]
-    float movement_speed = 5.0f, grav_change_speed = 5.0f, jump_force;
+    float movement_speed = 5.0f, jump_force; //grav_change_speed = 5.0f,
     float forward_speed, side_speed, vertical_speed;
     Vector3 speed;
 
@@ -141,6 +141,7 @@ public class PlayerController : MonoBehaviour
             forward_speed = Input.GetAxis("Vertical") * movement_speed * Time.deltaTime;
             side_speed = Input.GetAxis("Horizontal") * movement_speed * Time.deltaTime;
 
+            Debug.Log("hello");
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -171,7 +172,7 @@ public class PlayerController : MonoBehaviour
 
 
             UserInput();
-            UpdateContactPoint();
+            //UpdateContactPoint();
 
             if (objects_colliding_with.Count == 0)
             {
@@ -194,86 +195,86 @@ public class PlayerController : MonoBehaviour
 
 	}
 
-    void UpdateContactPoint()
-    {
-        if (grav_gun)
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width / 2), (Screen.height / 2)));
+    //void UpdateContactPoint()
+    //{
+    //    if (grav_gun)
+    //    {
+    //        RaycastHit hit;
+    //        Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width / 2), (Screen.height / 2)));
 
-            if (Physics.Raycast(ray.origin, ray.direction, out hit, 50.0f))
-            {
-                if (hit.transform.tag != "Player")
-                {
-                    contact_point.SetActive(true);
-                    contact_point.transform.position = hit.point;
+    //        if (Physics.Raycast(ray.origin, ray.direction, out hit, 50.0f))
+    //        {
+    //            if (hit.transform.tag != "Player")
+    //            {
+    //                contact_point.SetActive(true);
+    //                contact_point.transform.position = hit.point;
 
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        gravity_dir = -1 * hit.normal;
+    //                if (Input.GetMouseButtonDown(0))
+    //                {
+    //                    gravity_dir = -1 * hit.normal;
 
-                    }
-                    contact_point.transform.up = hit.normal;
-                }
-            }
-            else
-            {
-                contact_point.SetActive(false);
-            }
-        }
-        else
-        {
-            contact_point.SetActive(false);
-        }
-    }
+    //                }
+    //                contact_point.transform.up = hit.normal;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            contact_point.SetActive(false);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        contact_point.SetActive(false);
+    //    }
+    //}
 
-    IEnumerator Reorient(Vector3 new_up)
-    {
-        reorienting = true;
-        float time = 0.0f;
+    //IEnumerator Reorient(Vector3 new_up)
+    //{
+    //    reorienting = true;
+    //    float time = 0.0f;
 
-        Vector3 old_up = transform.up;
+    //    Vector3 old_up = transform.up;
 
-        Vector3 rot = transform.rotation.eulerAngles;
-        Vector3 old_rot = transform.rotation.eulerAngles;
+    //    Vector3 rot = transform.rotation.eulerAngles;
+    //    Vector3 old_rot = transform.rotation.eulerAngles;
 
-        if (new_up == transform.up * -1)
-        {         
-            float angle_count = 0.0f;
-            while (angle_count < 180.0f)
-            {
-                float num = Time.deltaTime * grav_change_speed * 500.0f;
+    //    if (new_up == transform.up * -1)
+    //    {         
+    //        float angle_count = 0.0f;
+    //        while (angle_count < 180.0f)
+    //        {
+    //            float num = Time.deltaTime * grav_change_speed * 500.0f;
 
-                rot.z += num;
-                transform.rotation = Quaternion.Euler(rot);
-                angle_count += num;
+    //            rot.z += num;
+    //            transform.rotation = Quaternion.Euler(rot);
+    //            angle_count += num;
  
-                yield return null;
-            }
+    //            yield return null;
+    //        }
 
-            old_rot.z += 180.0f;
-            transform.rotation = Quaternion.Euler(old_rot);
-        }
-        else
-        {
-            while (time < 1.1f)
-            {
-                Vector3 forward = Vector3.Cross(transform.right, new_up);
-                Quaternion target_rot = Quaternion.LookRotation(forward, new_up);
-                transform.rotation = Quaternion.Lerp(transform.rotation, target_rot, time);
+    //        old_rot.z += 180.0f;
+    //        transform.rotation = Quaternion.Euler(old_rot);
+    //    }
+    //    else
+    //    {
+    //        while (time < 1.1f)
+    //        {
+    //            Vector3 forward = Vector3.Cross(transform.right, new_up);
+    //            Quaternion target_rot = Quaternion.LookRotation(forward, new_up);
+    //            transform.rotation = Quaternion.Lerp(transform.rotation, target_rot, time);
 
-                //transform.up = Vector3.Slerp(old_up, new_up, time);
-                //Camera.main.transform.localRotation.SetLookRotation(hit.point);
+    //            //transform.up = Vector3.Slerp(old_up, new_up, time);
+    //            //Camera.main.transform.localRotation.SetLookRotation(hit.point);
 
-                time += Time.deltaTime * grav_change_speed;
-                yield return null;
-            }
-        }
+    //            time += Time.deltaTime * grav_change_speed;
+    //            yield return null;
+    //        }
+    //    }
 
         
-        reorienting = false;
-        yield return null;
-    }
+    //    reorienting = false;
+    //    yield return null;
+    //}
 
     void OnCollisionEnter(Collision col)
     {
@@ -281,11 +282,11 @@ public class PlayerController : MonoBehaviour
         //{
             objects_colliding_with.Add(col.gameObject);
 
-            if (transform.up != gravity_dir * -1 && !reorienting)
-            {
-                StartCoroutine(Reorient(gravity_dir * -1));
+            //if (transform.up != gravity_dir * -1 && !reorienting)
+            //{
+            //    StartCoroutine(Reorient(gravity_dir * -1));
 
-            }
+            //}
         //}
     }
 
