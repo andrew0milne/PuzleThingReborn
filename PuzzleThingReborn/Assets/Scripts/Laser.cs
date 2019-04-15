@@ -16,7 +16,12 @@ public class Laser : MonoBehaviour
 
     Vector3[] temp_beam;
 
-    bool active = true;
+    bool active = false;
+
+    public float activate_time = 5.0f;
+    public Collider stop;
+
+    bool always_on = false;
 
     // Use this for initialization
     void Start ()
@@ -44,7 +49,11 @@ public class Laser : MonoBehaviour
 
         temp_beam = new Vector3[line.positionCount];
 
-        Activate(active);
+        line.enabled = false;
+        stop.enabled = false;
+        ps.Stop();
+
+        //Activate(active);
     }
 
     void SetLineWidth(float num)
@@ -53,25 +62,57 @@ public class Laser : MonoBehaviour
         line.startWidth = num;
     }
 
-    void Activate(bool b)
+    void LockDown()
     {
-        line.enabled = b;
-        if (b)
+        always_on = true;
+        Activate();
+    }
+
+    IEnumerator LaserOn()
+    {
+
+        line.enabled = true;
+        stop.enabled = true;
+        ps.Play();
+
+        if (!always_on)
         {
-            ps.Play();       
-        }
-        else
-        {
+            yield return new WaitForSeconds(activate_time);
+
+            line.enabled = false;
+            stop.enabled = false;
             ps.Stop();
         }
 
-        active = b;
+        yield return null;
+    }
+
+    void Activate()
+    {
+
+        if (line.enabled == false)
+        {
+
+            StartCoroutine(LaserOn());
+        }
+        
+        //line.enabled = b;
+        //if (b)
+        //{
+        //    ps.Play();       
+        //}
+        //else
+        //{
+        //    ps.Stop();
+        //}
+
+        //active = b;
     }
 
     // Update is called once per frame
     void Update ()
     {
-        if (active)
+        if (line.enabled)
         {
             line.GetPositions(temp_beam);
             ps.transform.position = temp_beam[(int)Random.Range(0, laser_res - 1)];

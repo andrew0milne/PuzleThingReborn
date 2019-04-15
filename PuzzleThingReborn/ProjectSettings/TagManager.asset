@@ -16,6 +16,8 @@ TagManager:
   - NoteBlock
   - Walkable
   - KeyPadCont
+  - PickUp
+  - Activator
   layers:
   - Default
   - TransparentFX
@@ -29,9 +31,9 @@ TagManager:
   - Player
   - Equipment
   - Walkable
-  - 
-  - 
-  - 
+  - MiniMapCull
+  - MainCameraCull
+  - BothCull
   - 
   - 
   - 

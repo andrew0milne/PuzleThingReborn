@@ -18,6 +18,8 @@ public class SecurityCamera : MonoBehaviour
 
     public Transform axis;
 
+    public List<GameObject> targets;
+
 	// Use this for initialization
 	void Start ()
     {       
@@ -29,10 +31,21 @@ public class SecurityCamera : MonoBehaviour
        
     }
 	
-    
+    void Activate()
+    {
+        foreach(GameObject g in targets)
+        {
+            g.SendMessage("Activate");
+        }
+    }
 
-	// Update is called once per frame
-	void Update ()
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.gameObject.name);
+    }
+
+    // Update is called once per frame
+    void Update ()
     {
         if (rotating)
         {

@@ -7,6 +7,8 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour 
 {
     Rigidbody rb;
+    public int score = 0;
+    public Text score_text;
 
     //public GameObject contact_point;
 
@@ -41,6 +43,8 @@ public class PlayerController : MonoBehaviour
 
     bool grav_gun = true;
 
+    public GameObject game_controller;
+
     // Use this for initialization
     void Start () 
 	{
@@ -64,71 +68,71 @@ public class PlayerController : MonoBehaviour
     void UserInput()
     {
         
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width / 2), (Screen.height / 2)));
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3((Screen.width / 2), (Screen.height / 2)));
 
-            if (Physics.Raycast(ray.origin, ray.direction, out hit, 5.0f))
+        if (Physics.Raycast(ray.origin, ray.direction, out hit, 5.0f))
+        {
+            if (hit.collider.gameObject.tag == "MovingObject")
             {
-                if (hit.collider.gameObject.tag == "MovingObject")
+                if (hit.collider.gameObject.GetComponent<MovingObject>().clickable == true)
                 {
-                    if (hit.collider.gameObject.GetComponent<MovingObject>().clickable == true)
-                    {
-                        HUDText.text = "LMB to press";
-                        if (Input.GetMouseButtonDown(0))
-                        {
-                            hit.collider.gameObject.SendMessage("Activate");
-
-                        }
-                    }
-
-                }
-                else if (hit.collider.gameObject.tag == "PuzzleReset")
-                {
-                    HUDText.text = "LMB reset the Puzzle";
+                    HUDText.text = "LMB to press";
                     if (Input.GetMouseButtonDown(0))
                     {
-                        hit.collider.gameObject.SendMessage("Reset");
-                    }
+                        hit.collider.gameObject.SendMessage("Activate");
 
+                    }
                 }
-                else
+
+            }
+            else if (hit.collider.gameObject.tag == "PuzzleReset")
+            {
+                HUDText.text = "LMB reset the Puzzle";
+                if (Input.GetMouseButtonDown(0))
                 {
-                    HUDText.text = "";
+                    hit.collider.gameObject.SendMessage("Reset");
                 }
 
             }
             else
             {
                 HUDText.text = "";
-
             }
 
-            if (Input.GetMouseButtonDown(1))
-            {
-                beam_gun.SendMessage("Activate");
-            }
-            else if (Input.GetMouseButtonUp(1))
-            {
-                beam_gun.SendMessage("Deactivate");
-            }
+        }
+        else
+        {
+            HUDText.text = "";
 
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                grav_gun = !grav_gun;
-            }
+        }
 
-            // Camera Rotation
-            float rotLeftRight = Input.GetAxis("Mouse X") * mouse_sensitivity;
-            transform.Rotate(0, rotLeftRight, 0);
+        if (Input.GetMouseButtonDown(1))
+        {
+            beam_gun.SendMessage("Activate");
+        }
+        else if (Input.GetMouseButtonUp(1))
+        {
+            beam_gun.SendMessage("Deactivate");
+        }
 
-            vertical_rotation -= Input.GetAxis("Mouse Y") * mouse_sensitivity;
-            vertical_rotation = Mathf.Clamp(vertical_rotation, -up_down_range, up_down_range);
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            grav_gun = !grav_gun;
+        }
 
-            // Move the camera
-            Camera.main.transform.localRotation = Quaternion.Euler(vertical_rotation, 0, 0);
+        // Camera Rotation
+        float rotLeftRight = Input.GetAxis("Mouse X") * mouse_sensitivity;
+        transform.Rotate(0, rotLeftRight, 0);
+
+        vertical_rotation -= Input.GetAxis("Mouse Y") * mouse_sensitivity;
+        vertical_rotation = Mathf.Clamp(vertical_rotation, -up_down_range, up_down_range);
+
+        // Move the camera
+        Camera.main.transform.localRotation = Quaternion.Euler(vertical_rotation, 0, 0);
 
 
-            Move();
+        Move();
         
     }
 
@@ -141,7 +145,7 @@ public class PlayerController : MonoBehaviour
             forward_speed = Input.GetAxis("Vertical") * movement_speed * Time.deltaTime;
             side_speed = Input.GetAxis("Horizontal") * movement_speed * Time.deltaTime;
 
-            Debug.Log("hello");
+            
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -194,6 +198,45 @@ public class PlayerController : MonoBehaviour
 
 
 	}
+
+    private void OnTriggerEnter(Collider col)
+    {
+        switch(col.tag)
+        {
+            case "PickUp":
+                {
+                    score++;
+                    score_text.text = score.ToString();
+                    Destroy(col.gameObject);
+                    GameController.instance.UpdateScore(score);
+                    break;
+                }
+            case "Activator":
+                {
+                    col.gameObject.SendMessage("Activate");                 
+                    break;
+                }
+            default:
+                break;
+
+        }
+    }
+
+    private void OnTriggerExit(Collider col)
+    {
+        switch (col.tag)
+        {
+            
+            case "Activator":
+                {
+                    col.gameObject.SendMessage("Deactivate");
+                    break;
+                }
+            default:
+                break;
+
+        }
+    }
 
     //void UpdateContactPoint()
     //{
@@ -248,7 +291,7 @@ public class PlayerController : MonoBehaviour
     //            rot.z += num;
     //            transform.rotation = Quaternion.Euler(rot);
     //            angle_count += num;
- 
+
     //            yield return null;
     //        }
 
@@ -271,7 +314,7 @@ public class PlayerController : MonoBehaviour
     //        }
     //    }
 
-        
+
     //    reorienting = false;
     //    yield return null;
     //}
