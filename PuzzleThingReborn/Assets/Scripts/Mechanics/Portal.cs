@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Portal : MonoBehaviour {
+
+public class Portal : MonoBehaviour
+{
 
     public Transform receiver;
     public Image img;
@@ -21,6 +23,8 @@ public class Portal : MonoBehaviour {
 
     bool activated = false;
 
+    public AudioSource audio;
+
     // Use this for initialization
     void Start()
     {
@@ -33,13 +37,18 @@ public class Portal : MonoBehaviour {
 
         
         GetComponent<Renderer>().material.color = Color.white;
-       
+
+        audio = GetComponent<AudioSource>();
+
+
     }
 
     // Teleport the player
     IEnumerator Teleport(GameObject temp)
     {
         float t = 0.0f;
+
+        audio.Play();
 
         // Screen flash to white
         while (t < 1.1f)

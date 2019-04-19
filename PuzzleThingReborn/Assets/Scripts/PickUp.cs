@@ -20,6 +20,8 @@ public class PickUp : MonoBehaviour
 
     Light light;
 
+    public AudioSource audio;
+
     private void Start()
     {
         start_pos = transform.position;
@@ -31,6 +33,33 @@ public class PickUp : MonoBehaviour
         perlin_pos.y = start_pos.z * perlin_scale;
 
         light = GetComponent<Light>();
+
+        audio = GetComponent<AudioSource>();
+    }
+
+    IEnumerator Kill()
+    {
+        audio.pitch = Random.Range(0.8f, 1.2f);
+
+        audio.Play();
+
+        GetComponent<Renderer>().enabled = false;
+        GetComponent<SphereCollider>().enabled = false;
+        GetComponent<Light>().enabled = false;
+
+        while(audio.isPlaying)
+        {
+            yield return null;
+        }
+
+        Destroy(this.gameObject);
+
+        yield return null;
+    }
+
+    public void Activate()
+    {
+        StartCoroutine(Kill());
     }
 
     // Update is called once per frame

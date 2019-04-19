@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum State { SEARCH, CHASE, LOST, BACK, LOOK };
+public enum State { SEARCH, LOOK, CHASE, HUNT };
 
 public class EnemyController : MonoBehaviour
 {
-   
     public State current_state;
 
     public GameObject enemy;
@@ -27,6 +26,14 @@ public class EnemyController : MonoBehaviour
 
     public float turn_speed = 5.0f;
     public float speed;
+
+    public GameObject player;
+
+    public AudioSource[] spotted;
+    public AudioSource searching;
+    public AudioSource return_to_walking;
+
+    public float speach_chance = 1.0f;
 
     // Use this for initialization
     void Start ()
@@ -59,9 +66,13 @@ public class EnemyController : MonoBehaviour
 
         agent.speed = speed;
 
+       
         agent.destination = patrol_positions[current_position];
+        
+
+        player = GameObject.FindGameObjectWithTag("Player");
     }
-	
+
     public void Captured()
     {
         Debug.Log("sup");
@@ -69,8 +80,23 @@ public class EnemyController : MonoBehaviour
         StartCoroutine(LookAround());
     }
 
+    bool GetSpeachChance()
+    {
+        if(Random.Range(0.0f, 1.0f) < speach_chance)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     IEnumerator LookAround()
     {
+        if (GetSpeachChance() && searching.isPlaying == false)
+        {
+            searching.Play();
+        }
+
         current_state = State.LOOK;       
         float vel = agent.speed;
 
@@ -97,6 +123,12 @@ public class EnemyController : MonoBehaviour
         //}
 
         current_state = State.SEARCH;
+
+        if (GetSpeachChance() && return_to_walking.isPlaying == false)
+        {
+            return_to_walking.Play();
+        }
+
 
         yield return null;
     }
@@ -134,17 +166,43 @@ public class EnemyController : MonoBehaviour
     }
 
     public void TargetSpotted(GameObject target_loc)
-    {      
+    {
+        if (GetSpeachChance())
+        {
+            bool talk = true;
+            foreach (AudioSource a in spotted)
+            {
+                if(a.isPlaying)
+                {
+                    talk = false;
+                    break;
+                }
+            }
+
+            if (talk)
+            { spotted[Random.Range(0, spotted.Length)].Play(); }
+        }
+
         target = target_loc.transform;
 
-        current_state = State.CHASE;
+        if (current_state != State.HUNT)
+        {
+            current_state = State.CHASE;
+        }
+
         agent.destination = target.position;
         enemy.transform.LookAt(target);    
+    }
+
+    public void StartHunting()
+    {
+        current_state = State.HUNT;
     }
 
 	// Update is called once per frame
 	void Update ()
     {
+        
         enemy_parent.GetComponent<EnemyVision>().Chasing(current_state);
         switch (current_state)
         {
@@ -158,18 +216,21 @@ public class EnemyController : MonoBehaviour
                 if (agent.remainingDistance < 0.2f)
                 {
                     StartCoroutine(LookAround());
-                    
+
                     //current_state = State.LOOK;
                 }
                 break;
             case State.LOOK:
                 enemy.transform.Rotate(Vector3.up * Time.deltaTime * 90.0f, Space.World);
-                
+
                 break;
-            case State.BACK:
-                break;
-                
+            case State.HUNT:
+                {
+                    agent.destination = player.transform.position;
+                    break;
+                }
         }
+        
         
 	}
 }

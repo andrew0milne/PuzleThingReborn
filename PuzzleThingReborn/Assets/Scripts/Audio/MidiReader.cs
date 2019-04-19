@@ -147,6 +147,8 @@ public struct MidiFileInput
 {
     public string name;
     public int channel;
+    public ScaleNote scale_note;
+    public ScaleType scale_type;
 }
 
 public class MidiReader : MonoBehaviour
@@ -164,7 +166,7 @@ public class MidiReader : MonoBehaviour
     int number_of_channels;
     const int max_channels = 16;
 
-   
+    public float min_rest_length = 0.25f;
 
     public GameObject cube;
 
@@ -354,8 +356,11 @@ public class MidiReader : MonoBehaviour
     // - Combines notes that occur at the same time (chords)
     // - Adds an event for sections with no notes (rests)
     public void CleanUp(int channel)
-    {      
-        
+    {
+
+        int rest_count1 = 0;
+        int rest_count2 = 0;
+
         // Iterates through midi events
         for (int i = 0; i < midi_holder[channel].Count - 1; i++)
         {
@@ -363,18 +368,40 @@ public class MidiReader : MonoBehaviour
             MidiHolder current = midi_holder[channel][i];
             MidiHolder next = midi_holder[channel][i + 1];
 
+            if(current.length == 0.25f && current.pitch[0] == -1)
+            {
+                rest_count1++;
+            }
+            else if (current.length == 0.5f && current.pitch[0] == -1)
+            {
+                rest_count2++;
+            }
+
             // makes a rest
             if (current.time + current.length != next.time && current.time != next.time)
             {
-                MidiHolder rest =  ScriptableObject.CreateInstance<MidiHolder>();
                 float new_length = next.time - (current.time + current.length);
-                float new_time = current.time + current.length;
-                rest.Init(-1 , -1, -1, new_length, new_time);
 
-                midi_holder[channel].Insert(i + 1, rest);
-                i--;
+                if (new_length > min_rest_length)
+                { 
+                    float new_time = current.time + current.length;
+
+
+                    MidiHolder rest = ScriptableObject.CreateInstance<MidiHolder>();
+                    rest.Init(-1, -1, -1, new_length, new_time);
+
+                    midi_holder[channel].Insert(i + 1, rest);
+                    i--;
+                }
+                else
+                {
+                    midi_holder[channel][i].length += new_length;
+                }
             }
-        }     
+        }
+
+        print("0.25 rest count = " + rest_count1);
+        print("0.5 rest count = " + rest_count2);
 
         List<MidiHolder>[] temp_midi_holder = new List<MidiHolder>[max_channels];
         for (int i = 0; i < max_channels; i++)

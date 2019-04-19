@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
 public class MyMidiPlayer : MonoBehaviour
 {
 
@@ -52,10 +50,12 @@ public class MyMidiPlayer : MonoBehaviour
 
     int chord_num = 0;
 
+    public bool round_notes = true;
+
     //List<MidiHolder> melody;
     //int melody_counter = 0;
 
-    public bool g = false;
+    public bool structured = true;
 
     // Use this for initialization
     void Start()
@@ -79,8 +79,6 @@ public class MyMidiPlayer : MonoBehaviour
         //nextTickChords = b;
 
         playing = true;
-
-        Debug.Log("hello there");
 
         themes = new List<Theme>();
 
@@ -118,6 +116,8 @@ public class MyMidiPlayer : MonoBehaviour
 
         last_note = note;
         last_note.pitch[0] = -1;
+
+        next_note = note;
     }
 
 
@@ -180,72 +180,37 @@ public class MyMidiPlayer : MonoBehaviour
         return num;
     }
 
-    IEnumerator PlayNote(MidiHolder note, MidiHolder next_note, int song_num)
+    IEnumerator PlayNote(MidiHolder note, int song_num)
     {
-         if (note.pitch[0] != -1)
-         {
+        int offset = markov_offset * 12;
 
+        if (note.pitch[0] != -1)
+        {
             MidiHolder temp_note = note;
 
-            float length = (note.length);
-            float new_len = 0.0f;
+            float length = (note.length);         
 
-            float new_pitch = 0.0f;
-
-            MidiHolder new_note = ScriptableObject.CreateInstance<MidiHolder>();
-
-            bool make_new_note = Random.Range(0.0f, 2.0f) < MusicController.instance.intensity;
-
-            if (make_new_note)
+            if (round_notes)
             {
-                //Debug.Log("new note");
-
-                float old_len = length;
-                length /= 2.0f;
-
-                length = RoundToDecimanl(length, MusicController.instance.shortest_note_length, false);
-
-                new_len = old_len - length;
-
-                new_note = MusicController.instance.GetNote(note, song_num);
-            }
-
-            
-
-
-            for (int i = 0; i < note.pitch.Count; i++)
-            {
-                temp_note.pitch[i] = MusicController.instance.RoundNote(note.pitch[i]) + (12 * markov_offset);
+                for (int i = 0; i < note.pitch.Count; i++)
+                {
+                    temp_note.pitch[i] = MusicController.instance.RoundNote(note.pitch[i]);
+                }
             }
 
             for (int i = 0; i < note.pitch.Count; i++)
             {
-                midi_player.GetComponent<MIDIPlayer>().NoteOn(temp_note.pitch[i]);
+                midi_player.GetComponent<MIDIPlayer>().NoteOn(temp_note.pitch[i] + offset);
             }
 
             yield return new WaitForSeconds(length * (60.0f / MusicController.instance.bpm));// (note.length - 0.1f) * (60.0f/MusicController.instance.bpm));
 
             for (int i = 0; i < note.pitch.Count; i++)
             {
-                midi_player.GetComponent<MIDIPlayer>().NoteOff(temp_note.pitch[i]);
-            }
-
-            if (make_new_note)
-            {
-
-                new_pitch = MusicController.instance.RoundNote(new_note.pitch[0]) + (12 * markov_offset);
-
-                midi_player.GetComponent<MIDIPlayer>().NoteOn((int)new_pitch);
-
-
-                yield return new WaitForSeconds(new_len * (60.0f / MusicController.instance.bpm));// (note.length - 0.1f) * (60.0f/MusicController.instance.bpm));
-
-
-                midi_player.GetComponent<MIDIPlayer>().NoteOff((int)new_pitch);
-
-            }
-
-        }
+                midi_player.GetComponent<MIDIPlayer>().NoteOff(temp_note.pitch[i] + offset);
+            }     
+            
+         }
 
         yield return null;
     }
@@ -312,28 +277,39 @@ public class MyMidiPlayer : MonoBehaviour
             /chord_beat_counter += MusicController.instance.shortest_note_length;*/
 
 
-
-
-            if (markov_beat_counter >= themes[MusicController.instance.song_number].theme[1][theme_counter[1]].length && markov)
+            if (structured)
             {
-                markov_beat_counter = 0.0f;
+                if (markov_beat_counter >= themes[MusicController.instance.song_number].theme[1][theme_counter[1]].length && markov)
+                {
+                    markov_beat_counter = 0.0f;
 
-                next_note = themes[MusicController.instance.song_number].theme[1][GetNextIter(theme_counter[1], themes[MusicController.instance.song_number].theme[1].Count)];
+                    
 
-                StartCoroutine(PlayNote(note, next_note, MusicController.instance.song_number));
+                    StartCoroutine(PlayNote(note,  MusicController.instance.song_number));
 
-                theme_counter[1] = GetNextIter(theme_counter[1], themes[MusicController.instance.song_number].theme[1].Count);
+                    theme_counter[1] = GetNextIter(theme_counter[1], themes[MusicController.instance.song_number].theme[1].Count);
 
-                //theme_counter[1]++;
-                //if (theme_counter[1] >= theme[1].Count)
-                //{
-                //    theme_counter[1] = 0;
-                //}
-                note = themes[MusicController.instance.song_number].theme[1][theme_counter[1]];
+                    //theme_counter[1]++;
+                    //if (theme_counter[1] >= theme[1].Count)
+                    //{
+                    //    theme_counter[1] = 0;
+                    //}
+                    note = themes[MusicController.instance.song_number].theme[1][theme_counter[1]];
 
 
+                }
             }
+            else
+            {
+                if (markov_beat_counter >= note.length && markov)
+                {
+                    markov_beat_counter = 0.0f;
 
+                    note = MusicController.instance.GetNote(note, MusicController.instance.song_number);
+
+                    StartCoroutine(PlayNote(note, MusicController.instance.song_number));           
+                }
+            }
             markov_beat_counter += MusicController.instance.shortest_note_length;
 
             nextTick += MusicController.instance.time_step;

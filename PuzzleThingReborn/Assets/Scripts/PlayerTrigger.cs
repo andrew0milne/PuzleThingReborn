@@ -16,4 +16,9 @@ public class PlayerTrigger : MonoBehaviour
         }
     }
 
+    void Deactivate()
+    {
+
+    }
+
 }

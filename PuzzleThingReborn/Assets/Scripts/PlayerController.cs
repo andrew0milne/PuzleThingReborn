@@ -3,25 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum Movement_State{ STILL, WALK, RUN };
+
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour 
 {
     Rigidbody rb;
-    public int score = 0;
-    public Text score_text;
+
 
     //public GameObject contact_point;
 
-    [SerializeField]
-    float movement_speed = 5.0f, jump_force; //grav_change_speed = 5.0f,
-    float forward_speed, side_speed, vertical_speed;
+    [Header("Player Attributes")]
+    public int max_lives = 3;
+    public int lives = 0;
+    bool dead = false;
+    public float movement_speed = 5.0f;
+    public float run_speed_increase = 1.5f;
+    public float jump_force;
+    //grav_change_speed = 5.0f,
+    float forward_speed;
+    float side_speed;
+    float vertical_speed;
     Vector3 speed;
 
     [SerializeField]
     float mouse_sensitivity = 60.0f, vertical_rotation = 0.0f, up_down_range = 60.0f;
 
-    CharacterController char_contr;
-
+    
     Vector3 gravity_dir;
 
     bool grounded;
@@ -32,11 +40,22 @@ public class PlayerController : MonoBehaviour
    
 	public bool cursorLocked = false;
 
-	
+	[Header("Canvas Objects")]
 	public Canvas canvas;
     public Text HUDText;
+    public Image black_screen;
+    public float black_screen_speed = 0.2f;
+    public int score = 0;
+    public Text score_text;
+    public Text lives_text;
+    public GameObject MusicUI;
 
-	public GameObject beam_gun;
+    [Header("Variable for the Music Controller")]
+    public Movement_State move_state = Movement_State.STILL;
+
+
+    [Header("Other")]
+    public GameObject beam_gun;
 
     Vector3 direction = Vector3.zero;
     Vector3 old_pos = Vector3.zero;
@@ -44,6 +63,8 @@ public class PlayerController : MonoBehaviour
     bool grav_gun = true;
 
     public GameObject game_controller;
+
+    Vector3 start_pos;
 
     // Use this for initialization
     void Start () 
@@ -58,11 +79,17 @@ public class PlayerController : MonoBehaviour
         objects_colliding_with = new List<GameObject>();
 
         rb = GetComponent<Rigidbody>();
-        char_contr = GetComponent<CharacterController>();
+        
 
         gravity_dir = new Vector3(0.0f, -1.0f, 0.0f);
 
         Physics.IgnoreLayerCollision(9, 10);
+
+        lives = max_lives;
+
+        start_pos = transform.position;
+
+        lives_text.text = lives.ToString();
     }
 
     void UserInput()
@@ -121,6 +148,11 @@ public class PlayerController : MonoBehaviour
             grav_gun = !grav_gun;
         }
 
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            MusicUI.SetActive(!MusicUI.activeSelf);
+        }
+
         // Camera Rotation
         float rotLeftRight = Input.GetAxis("Mouse X") * mouse_sensitivity;
         transform.Rotate(0, rotLeftRight, 0);
@@ -140,16 +172,32 @@ public class PlayerController : MonoBehaviour
     {
         if (grounded)
         {
-
             // Movement
             forward_speed = Input.GetAxis("Vertical") * movement_speed * Time.deltaTime;
             side_speed = Input.GetAxis("Horizontal") * movement_speed * Time.deltaTime;
 
-            
+            if (forward_speed == 0.0f && side_speed == 0.0f)
+            {
+                move_state = Movement_State.STILL;                
+            }
+            else
+            {
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    forward_speed *= run_speed_increase;
+                    side_speed *= run_speed_increase;
+
+                    move_state = Movement_State.RUN;
+                }
+                else
+                {
+                    move_state = Movement_State.WALK;
+                }            
+            }
 
             if (Input.GetButtonDown("Jump"))
             {
-                rb.AddForce(gravity_dir * -1 * jump_force);
+                //rb.AddForce(gravity_dir * -1 * jump_force);
                 //rb.AddForce(direction.normalized * jump_force);
             }            
         }
@@ -166,6 +214,62 @@ public class PlayerController : MonoBehaviour
         old_pos = transform.position;
 
         rb.AddForce(gravity_dir * 9.8f);
+    }
+
+    void TakeDamage()
+    {
+        if (dead == false)
+        {
+            lives--;
+            lives_text.text = lives.ToString();
+            StartCoroutine(Death());
+
+            
+             GameController.instance.PlayerDead(lives);
+            
+        }
+    }
+
+    IEnumerator Death()
+    {
+        float t = 0.0f;
+
+        GameController.instance.PlayerDead(lives);
+
+        Debug.Log("in death");
+
+        dead = true;
+
+        Color transparent = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        // Screen flash to black
+        while (t < 1.1f)
+        {
+            black_screen.color = Color.Lerp(transparent, Color.black, t);
+            t += black_screen_speed * Time.deltaTime;
+
+            yield return null;
+        }
+
+
+        // Moe and rotate the player
+        transform.position = start_pos;// - posisitionOffset;
+        //player.transform.rotation = Quaternion.Euler(0.0f, player.transform.rotation.eulerAngles.y - 180.0f, 0.0f);
+
+        yield return new WaitForSeconds(0.2f);
+
+        // Flash the screen to transparent
+        t = 0.0f;
+        while (t < 1.5f)
+        {
+            black_screen.color = Color.Lerp(Color.black, transparent, t);
+            t += black_screen_speed * Time.deltaTime;
+            yield return null;
+        }
+
+        dead = false;
+
+        yield return null;
     }
 
     // Update is called once per frame
@@ -195,8 +299,6 @@ public class PlayerController : MonoBehaviour
 		{
 			TogglePause ();
 		}
-
-
 	}
 
     private void OnTriggerEnter(Collider col)
@@ -207,13 +309,19 @@ public class PlayerController : MonoBehaviour
                 {
                     score++;
                     score_text.text = score.ToString();
-                    Destroy(col.gameObject);
+                    col.gameObject.GetComponent<PickUp>().Activate();
                     GameController.instance.UpdateScore(score);
                     break;
                 }
             case "Activator":
                 {
                     col.gameObject.SendMessage("Activate");                 
+                    break;
+                }
+            case "EnemyTrigger":
+                {
+                    Debug.Log("enemy");
+                    TakeDamage();
                     break;
                 }
             default:

@@ -23,11 +23,16 @@ public class Laser : MonoBehaviour
 
     bool always_on = false;
 
+    AudioSource audio;
+    public bool play_sound = false;
+
     // Use this for initialization
     void Start ()
     {
         line = GetComponent<LineRenderer>();
         ps = GetComponentInChildren<ParticleSystem>();
+
+        audio = GetComponent<AudioSource>();
 
         line.positionCount = laser_res + 1;
 
@@ -74,6 +79,8 @@ public class Laser : MonoBehaviour
         line.enabled = true;
         stop.enabled = true;
         ps.Play();
+        if (play_sound)
+        { audio.Play(); }
 
         if (!always_on)
         {
@@ -82,6 +89,8 @@ public class Laser : MonoBehaviour
             line.enabled = false;
             stop.enabled = false;
             ps.Stop();
+            if (play_sound)
+            { audio.Stop(); }
         }
 
         yield return null;

@@ -18,6 +18,7 @@ TagManager:
   - KeyPadCont
   - PickUp
   - Activator
+  - EnemyTrigger
   layers:
   - Default
   - TransparentFX

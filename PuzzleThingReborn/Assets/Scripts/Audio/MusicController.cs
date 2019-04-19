@@ -25,13 +25,24 @@ public class MusicController : MonoBehaviour
 
     public GameObject[] musicObjects;
 
-    
-    public float note_spawn_rate;
-    public float rest_spawn_rate;
 
+    [Header("Main Music Controllers")]
+    [Tooltip("Controls variables such as the bpm, volume and rythmic density")]
+    [Range(-1.0f, 1.0f)]
+    public float intensity = 1.0f;
+    [Tooltip("Controls variables such as the scale and root note (Basically how happy the music is)")]
+    [Range(-1.0f, 1.0f)]
+    public float valence = 0.0f;
+  
+
+    [Header("BPM")]
     [Range(50.0f, 300.0f)]
     public float bpm;
+    public bool change_bpm = true;
+    public float min_bpm = 80.0f;
+    public float max_bpm = 150.0f;
 
+    [Header("Scales")]
     public ScaleNote scale_note;
     public ScaleType scale_type;
     public int scale_type_num;
@@ -53,10 +64,7 @@ public class MusicController : MonoBehaviour
 
     List<DependHolder> freq;
 
-    public bool change_bpm = true;
-
-    public float min_bpm = 80.0f;
-    public float max_bpm = 150.0f;
+   
 
     public float min_dist = 1.0f;
     public float max_dist = 10.0f;
@@ -66,7 +74,7 @@ public class MusicController : MonoBehaviour
 
     public int song_number = 0;
 
-    public float intensity = 0.0f;
+    
 
     private void Awake()
     {
@@ -856,6 +864,8 @@ public class MusicController : MonoBehaviour
             
         //}
     }
+
+    
 
     float RoundToDecimanl(float number, float deciml, bool can_be_zero)
     {

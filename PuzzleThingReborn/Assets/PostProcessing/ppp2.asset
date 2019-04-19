@@ -124,7 +124,7 @@ MonoBehaviour:
         temperature: -7
         tint: 0
         hueShift: 0
-        saturation: 1.13
+        saturation: 0.8
         contrast: 1.37
       channelMixer:
         red: {x: 1, y: 0, z: 0}
@@ -132,7 +132,7 @@ MonoBehaviour:
         blue: {x: 0, y: 0, z: 1}
         currentEditingChannel: 0
       colorWheels:
-        mode: 1
+        mode: 0
         log:
           slope: {r: 1, g: 1, b: 1, a: 0}
           power: {r: 1, g: 1, b: 1, a: 0}
@@ -155,6 +155,15 @@ MonoBehaviour:
               weightedMode: 0
               inWeight: 0.33333334
               outWeight: 0.33333334
+            - serializedVersion: 3
+              time: 0.4753363
+              value: 0.4705882
+              inSlope: 1
+              outSlope: 1
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
             - serializedVersion: 3
               time: 1
               value: 1
@@ -305,10 +314,10 @@ MonoBehaviour:
       lut: {fileID: 0}
       contribution: 1
   chromaticAberration:
-    m_Enabled: 0
+    m_Enabled: 1
     m_Settings:
       spectralTexture: {fileID: 2800000, guid: ff5f3317371838d4fa16ac6c2acf2040, type: 3}
-      intensity: 0
+      intensity: -0.39533055
   grain:
     m_Enabled: 0
     m_Settings:
