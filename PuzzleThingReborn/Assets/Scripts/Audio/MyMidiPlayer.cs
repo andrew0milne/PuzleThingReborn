@@ -186,15 +186,20 @@ public class MyMidiPlayer : MonoBehaviour
 
         if (note.pitch[0] != -1)
         {
-            MidiHolder temp_note = note;
+            MidiHolder temp_note = ScriptableObject.CreateInstance<MidiHolder>();
+            temp_note.Init(note.pitch[0], note.length);
 
-            float length = (note.length);         
+            for(int i = 1; i < note.pitch.Count; i++)
+            {
+                temp_note.pitch.Add(note.pitch[i]);
+            }
 
+           
             if (round_notes)
             {
                 for (int i = 0; i < note.pitch.Count; i++)
                 {
-                    temp_note.pitch[i] = MusicController.instance.RoundNote(note.pitch[i]);
+                    temp_note.pitch[i] = MusicController.instance.RoundNote(temp_note.pitch[i]);
                 }
             }
 
@@ -203,7 +208,7 @@ public class MyMidiPlayer : MonoBehaviour
                 midi_player.GetComponent<MIDIPlayer>().NoteOn(temp_note.pitch[i] + offset);
             }
 
-            yield return new WaitForSeconds(length * (60.0f / MusicController.instance.bpm));// (note.length - 0.1f) * (60.0f/MusicController.instance.bpm));
+            yield return new WaitForSeconds(temp_note.length * (60.0f / MusicController.instance.bpm));// (note.length - 0.1f) * (60.0f/MusicController.instance.bpm));
 
             for (int i = 0; i < note.pitch.Count; i++)
             {
@@ -306,6 +311,8 @@ public class MyMidiPlayer : MonoBehaviour
                     markov_beat_counter = 0.0f;
 
                     note = MusicController.instance.GetNote(note, MusicController.instance.song_number);
+
+                    print(note.pitch[0]);
 
                     StartCoroutine(PlayNote(note, MusicController.instance.song_number));           
                 }

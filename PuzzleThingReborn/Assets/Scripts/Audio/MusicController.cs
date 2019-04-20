@@ -69,8 +69,8 @@ public class MusicController : MonoBehaviour
     public float min_dist = 1.0f;
     public float max_dist = 10.0f;
 
-    public GameObject player;
-    public GameObject enemy;
+    //public GameObject player;
+    //public GameObject enemy;
 
     public int song_number = 0;
 
@@ -142,28 +142,16 @@ public class MusicController : MonoBehaviour
         reader_script.ReadInMidi();
         freq = reader_script.FreqDistribution(song_number);
 
-        int[]scale =GetScale();
+        
 
-        for(int i = 0; i < 7; i++)
-        {
-            Debug.Log(scale[i] + "-->"+ GetNoteName(scale[i]));
-        }
+        int[] scale = GetScale();
+
+       
 
         //scale_type = (ScaleType)num;
     }
 
-    void UpdateBPM()
-    {
-        float distance = Vector3.Distance(player.transform.position, enemy.transform.position);
-
-        intensity = (distance - min_dist) / max_dist;
-
-        intensity = Mathf.Clamp(intensity, 0.0f, 1.0f);
-
-        intensity = 1.0f - intensity;
-
-        bpm = Mathf.Lerp(min_bpm, max_bpm, intensity);
-    }
+    
 
     IEnumerator SetUp()
     {
@@ -205,7 +193,7 @@ public class MusicController : MonoBehaviour
     public int[] GetScale()
     {
         int[] scale;
-
+        
         scale_type = (ScaleType)scale_type_num;
 
         switch (scale_type)
@@ -822,6 +810,19 @@ public class MusicController : MonoBehaviour
         return reader_script.GetNote(freq, note, song_number);
     }
 
+    void UpdateVnI()
+    {
+        float num = (valence + 1) * 3;
+
+        scale_type_num = 6 - (int)num;
+
+
+        float intensity_lerp = (intensity + 1) / 2.0f;
+
+        bpm = Mathf.Lerp(min_bpm, max_bpm, intensity_lerp);
+
+    }
+
     void Update ()
     {
         time_step = 60.0f/(bpm / shortest_note_length);
@@ -856,13 +857,10 @@ public class MusicController : MonoBehaviour
 
         if (change_bpm)
         {
-            UpdateBPM();
+            //UpdateBPM();
         }
 
-        //if(change_melody)
-        //{
-            
-        //}
+        UpdateVnI();
     }
 
     

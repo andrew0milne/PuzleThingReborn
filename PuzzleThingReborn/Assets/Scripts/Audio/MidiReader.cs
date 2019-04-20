@@ -450,14 +450,19 @@ public class MidiReader : MonoBehaviour
 
     }
 
-    bool CheckNotes(MidiHolder mh1, MidiHolder mh2, bool check_length)
+    bool CheckNotes(MidiHolder mh1, MidiHolder mh2, bool check_length, bool debug)
     {
         if (check_length)
         {
-            if (mh1.pitch.Count == mh2.pitch.Count && mh1.og_length == mh2.og_length)
+            if (debug)
+            { print("                                    " + mh1.pitch.Count + "=" + mh2.pitch.Count + " , " + mh1.length + "=" + mh2.length); }
+            if (mh1.pitch.Count == mh2.pitch.Count && mh1.length == mh2.length)
             {
                 for (int i = 0; i < mh1.pitch.Count; i++)
                 {
+                    if (debug)
+                    { print("                                    " + mh1.pitch[i] + "=" + mh2.pitch[i]); }
+                    
                     if (mh1.pitch[i] != mh2.pitch[i])
                     {
                         return false;
@@ -511,7 +516,7 @@ public class MidiReader : MonoBehaviour
             // Checks to see if the current note sequence has been found before
             foreach (DependHolder dh in freq_distribution)
             {
-                if (CheckNotes(midi_holder[song_number][i], dh.note, true))
+                if (CheckNotes(midi_holder[song_number][i], dh.note, true, false))
                 {
                     found = true;
                     dh.AddNote(midi_holder[song_number][i + 1]);
@@ -540,56 +545,59 @@ public class MidiReader : MonoBehaviour
         return freq_distribution;  
     }
 
-    public MidiHolder GetNoteWithChord(List<DependHolder> freq, MidiHolder previous_note, int chord_root)
-    {
-        foreach (DependHolder dh in freq)
-        {
-            if (CheckNotes(previous_note, dh.note, true))
-            {
-                foreach(NextNote nn in dh.next_note)
-                {
-                    if(MusicController.instance.IsInChord(nn.note.pitch[0], chord_root))
-                    {
-                        MidiHolder new_note = ScriptableObject.CreateInstance<MidiHolder>();
-                        new_note.pitch = nn.note.pitch;
-                        new_note.length = nn.note.length;
+    //public MidiHolder GetNoteWithChord(List<DependHolder> freq, MidiHolder previous_note, int chord_root)
+    //{
+    //    foreach (DependHolder dh in freq)
+    //    {
+    //        if (CheckNotes(previous_note, dh.note, true))
+    //        {
+    //            foreach(NextNote nn in dh.next_note)
+    //            {
+    //                if(MusicController.instance.IsInChord(nn.note.pitch[0], chord_root))
+    //                {
+    //                    MidiHolder new_note = ScriptableObject.CreateInstance<MidiHolder>();
+    //                    new_note.pitch = nn.note.pitch;
+    //                    new_note.length = nn.note.length;
 
-                        return new_note;
-                    }
-                }
+    //                    return new_note;
+    //                }
+    //            }
 
-                break;
-            }
-        }
+    //            break;
+    //        }
+    //    }
 
-        Debug.Log("ERROR: NO NEXT NOTE FOUND, CHECKING ALL NOTES");
+    //    Debug.Log("ERROR: NO NEXT NOTE FOUND, CHECKING ALL NOTES");
 
-        foreach (DependHolder dh in freq)
-        {
-            if(MusicController.instance.IsInChord(dh.note.pitch[0], chord_root))
-            {
-                MidiHolder new_note = ScriptableObject.CreateInstance <MidiHolder>();
-                new_note.pitch = dh.note.pitch;
-                new_note.length = dh.note.length;
+    //    foreach (DependHolder dh in freq)
+    //    {
+    //        if(MusicController.instance.IsInChord(dh.note.pitch[0], chord_root))
+    //        {
+    //            MidiHolder new_note = ScriptableObject.CreateInstance <MidiHolder>();
+    //            new_note.pitch = dh.note.pitch;
+    //            new_note.length = dh.note.length;
 
-                return new_note;
-            }
-        }
+    //            return new_note;
+    //        }
+    //    }
 
-        Debug.Log("ERROR: NO NOTE GENERATED, GENERATING BASE NOTE");
+    //    Debug.Log("ERROR: NO NOTE GENERATED, GENERATING BASE NOTE");
 
-        MidiHolder note = ScriptableObject.CreateInstance <MidiHolder>();
-        note.pitch = new List<int>();
-        int[] scale = MusicController.instance.GetScale();
-        note.pitch.Add(scale[chord_root]);
-        note.length = 1.0f;
+    //    MidiHolder note = ScriptableObject.CreateInstance <MidiHolder>();
+    //    note.pitch = new List<int>();
+    //    int[] scale = MusicController.instance.GetScale();
+    //    note.pitch.Add(scale[chord_root]);
+    //    note.length = 1.0f;
 
-        return note;
-    }
+    //    return note;
+    //}
 
     public MidiHolder GetNote(List<DependHolder> freq, MidiHolder previous_note, int song_number)
     {
         //Debug.Log("Get next note");
+
+        print("--- " + Time.time + " ---");
+        print(freq.Count);
 
         bool check_length = true;
 
@@ -597,16 +605,19 @@ public class MidiReader : MonoBehaviour
         {
             foreach (DependHolder dh in freq)
             {
-                if (CheckNotes(previous_note, dh.note, check_length))
-                {
-                    Debug.Log(dh.note.pitch[0] + ", " + dh.note.length);
 
-                    int random = Random.Range(0, dh.max_freq);
+                //print(dh.note.pitch[0] + ", " + dh.note.length + ", " + dh.note.pitch.Count);
+
+                if (CheckNotes(previous_note, dh.note, check_length, false))
+                {                
+
+                    float random = Random.Range(0, (float)dh.max_freq);
                     int p = 0;
 
+                    print(dh.next_note.Count);
                     foreach (NextNote nn in dh.next_note)
                     {
-                        p += nn.freq;
+                        p += nn.freq;                    
 
                         //Debug.Log(p + " >= " + random + "?");
 
@@ -618,6 +629,8 @@ public class MidiReader : MonoBehaviour
                             new_note.pitch = nn.note.pitch;
                             new_note.length = nn.note.length;
 
+                            print(dh.note.pitch[0] + ", " + dh.note.length + " --> " + new_note.pitch[0] + ", " + new_note.length);
+
                             return new_note;
                         }
                         //Debug.Log("no");
@@ -626,10 +639,11 @@ public class MidiReader : MonoBehaviour
                     break;
                 }
             }
-            
 
-            
-            Debug.Log("WARNING: NOTE " + previous_note.pitch[0] + ", " + previous_note.length );
+
+
+            Debug.Log("WARNING: NOTE " + previous_note.pitch[0] + ", " + previous_note.length + ", " + previous_note.pitch.Count);
+            print("-----------------------------------------------------------------------------------------------------------");
 
             if (check_length)
             {
@@ -638,10 +652,13 @@ public class MidiReader : MonoBehaviour
 
             check_length = false;
         }
-        Debug.Log("WARNING: NO NOTE GENERATED, RESTARTING MARKOV");
+        Debug.Log("WARNING: NO NOTE GENERATED, CREATING A RANDOM NOTE");
 
         MidiHolder note = ScriptableObject.CreateInstance <MidiHolder>();
-        note = GetFirstNote(song_number);
+
+        note = freq[Random.Range(0, freq.Count)].note;
+
+        //note = GetFirstNote(song_number);
         //note.length = MusicController.instance.shortest_note_length;
 
         return note;

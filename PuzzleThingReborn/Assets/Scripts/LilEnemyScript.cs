@@ -13,16 +13,7 @@ public class LilEnemyScript : MonoBehaviour
         parent = transform.parent.gameObject;
 	}
 
-    public void Captured()
-    {
-        Debug.Log("fiwogfo");
-
-        if (parent.GetComponent<EnemyController>() != null)
-        {
-            parent.GetComponent<EnemyController>().Captured();
-        }
-        
-    }
+    
 
     // Update is called once per frame
     void Update ()
