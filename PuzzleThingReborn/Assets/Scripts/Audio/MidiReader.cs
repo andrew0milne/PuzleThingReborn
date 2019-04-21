@@ -57,6 +57,7 @@ public class DependHolder : ScriptableObject
 {
     public MidiHolder note;
     public List<NextNote> next_note;
+
     public int max_freq;
 
     public void Init(MidiHolder a)
@@ -187,12 +188,14 @@ public class MidiReader : MonoBehaviour
     MidiHolder first_note;
 
     // Use this for initialization
-    void Awake()
+    void Start()
     {
         //Debug.Log(Application.dataPath + "/Audio/Midi Files/" + midi_file_name + ".mid");
 
         //MusicController.instance.scale_note = og_scale_note;
         //MusicController.instance.scale_type = og_scale_type;
+
+        print(MusicController.instance);
 
         MusicController.instance.UpdateScales(og_scale_type, og_scale_note);
 
@@ -596,8 +599,8 @@ public class MidiReader : MonoBehaviour
     {
         //Debug.Log("Get next note");
 
-        print("--- " + Time.time + " ---");
-        print(freq.Count);
+        //print("--- " + Time.time + " ---");
+       // print(freq.Count);
 
         bool check_length = true;
 
@@ -614,7 +617,7 @@ public class MidiReader : MonoBehaviour
                     float random = Random.Range(0, (float)dh.max_freq);
                     int p = 0;
 
-                    print(dh.next_note.Count);
+                    //print(dh.next_note.Count);
                     foreach (NextNote nn in dh.next_note)
                     {
                         p += nn.freq;                    
@@ -629,7 +632,7 @@ public class MidiReader : MonoBehaviour
                             new_note.pitch = nn.note.pitch;
                             new_note.length = nn.note.length;
 
-                            print(dh.note.pitch[0] + ", " + dh.note.length + " --> " + new_note.pitch[0] + ", " + new_note.length);
+                            //print(dh.note.pitch[0] + ", " + dh.note.length + " --> " + new_note.pitch[0] + ", " + new_note.length);
 
                             return new_note;
                         }

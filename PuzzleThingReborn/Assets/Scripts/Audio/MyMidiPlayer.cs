@@ -312,7 +312,7 @@ public class MyMidiPlayer : MonoBehaviour
 
                     note = MusicController.instance.GetNote(note, MusicController.instance.song_number);
 
-                    print(note.pitch[0]);
+                    //print(note.pitch[0]);
 
                     StartCoroutine(PlayNote(note, MusicController.instance.song_number));           
                 }

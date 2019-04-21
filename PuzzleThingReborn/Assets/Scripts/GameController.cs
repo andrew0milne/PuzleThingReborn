@@ -35,7 +35,7 @@ public class GameController : MonoBehaviour
     public AudioSource alarm_voice;
     public AudioSource alarm;
 
-
+    
     [Header("-Variables for the Music Controller-")]
     [Header("Intensity")]
     public float intensity = 0.0f;
@@ -112,7 +112,7 @@ public class GameController : MonoBehaviour
         {
             case Movement_State.STILL:
                 {
-                    if (movement_factor > 0.0f)
+                    if (movement_factor > -1.0f)
                     {
                         movement_factor -= Time.deltaTime * movement_factor_change_speed;
                     }
@@ -121,11 +121,11 @@ public class GameController : MonoBehaviour
                 }
             case Movement_State.WALK:
                 {
-                    if (movement_factor > 0.5f)
+                    if (movement_factor > 0.0f)
                     {
                         movement_factor -= Time.deltaTime * movement_factor_change_speed;
                     }
-                    else if(movement_factor < 0.5f)
+                    else if(movement_factor < 0.0f)
                     {
                         movement_factor += Time.deltaTime * movement_factor_change_speed;
                     }
@@ -299,5 +299,8 @@ public class GameController : MonoBehaviour
         valence = RoundToDecimanl(valence, 0.01f, true);
 
         data_point.rectTransform.localPosition = new Vector2(data_point_scale * valence, data_point_scale * intensity);
+
+        MusicController.instance.intensity = intensity;
+        MusicController.instance.valence = valence;
     }
 }

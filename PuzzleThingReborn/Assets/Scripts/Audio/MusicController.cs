@@ -78,6 +78,8 @@ public class MusicController : MonoBehaviour
 
     private void Awake()
     {
+        print("hello");
+
         if (instance == null)
         {
             instance = this;
@@ -527,8 +529,6 @@ public class MusicController : MonoBehaviour
             basic_scale.Add(last);
         }
         
-        
-
         return basic_scale;
     }
 
@@ -557,45 +557,6 @@ public class MusicController : MonoBehaviour
                 }
             }
         }
-
-        /*foreach (DependHolder dh in freq)
-        //{
-        //    if(GetBasicPitch(dh.note.pitch[0]) == GetBasicPitch(chords[0].pitch[0]))
-        //    {
-        //        Debug.Log("FOUND AT 0");
-        //        first = dh.note;
-        //        found_note = true;
-        //        break;
-        //    }
-        //}
-        //
-        //if(found_note == false)
-        //{
-        //    foreach (DependHolder dh in freq)
-        //    {
-        //        if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 1))
-        //        {
-        //            Debug.Log("FOUND AT 1");
-        //            first = dh.note;
-        //            found_note = true;
-        //            break;
-        //        }
-        //    }
-        //}
-        //
-        //if (found_note == false)
-        //{
-        //    foreach (DependHolder dh in freq)
-        //    {
-        //        if (GetBasicPitch(dh.note.pitch[0]) == GetNoteInChord(GetBasicPitch(chords[0].pitch[0]), 2))
-        //        {
-        //            Debug.Log("FOUND AT 2");
-        //            first = dh.note;
-        //            found_note = true;
-        //            break;
-        //        }
-        //    }
-        //}*/
 
         melody.Add(first);
         length_left -= melody[0].length;
@@ -626,57 +587,6 @@ public class MusicController : MonoBehaviour
         return full_chord;
 
     }
-
-
-
-    //List<MidiHolder> AlterMelodyToChords(List<MidiHolder> melody, List<MidiHolder> chords)
-    //{
-    //    float current_time = 0.0f;
-
-    //    int chord_iter = 0;
-
-    //    foreach(MidiHolder mh in melody)
-    //    {
-    //        mh.pitch[0] += GetRootNote();
-
-    //        //int chord_pitch_dif = PitchShiftDegree(mh.pitch[0]);
-    //        //int pitch_dif = 10000;
-
-    //        //if(current_time >= chords[chord_iter].length)
-    //        //{
-    //        //    current_time = 0.0f;
-    //        //    chord_iter++;
-    //        //}
-
-    //        //if(chord_iter >= chords.Count)
-    //        //{
-    //        //    break;
-    //        //}
-    //        ////Debug.Log("iter " + chord_iter);
-
-    //        ////Get the actual chord based of time
-    //        //int[] current_chord = GetFullChord(chords[chord_iter].pitch[0]);
-
-    //        //for(int i = 0; i < 4; i++)
-    //        //{
-    //        //    float num = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
-    //        //    Debug.Log(num);
-
-    //        //    if (Mathf.Abs( (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0]) < pitch_dif)
-    //        //    {
-    //        //        pitch_dif = (current_chord[i] + (12 * chord_pitch_dif)) - mh.pitch[0];
-    //        //    }
-    //        //}
-    //        //Debug.Log(mh.pitch[0] + ", " + pitch_dif);
-    //        //mh.pitch[0] += pitch_dif;
-
-
-
-    //        //current_time += mh.length;
-    //    }
-
-    //    return melody;
-    //}
 
     public List<MidiHolder>[] GetTheme(bool scentence, int chords_per_phrase, float length_min, float length_max, float max_phrase_length, int song_number)
     {
@@ -769,42 +679,8 @@ public class MusicController : MonoBehaviour
         return scale_progression;
     }
 
-    //public List<MidiHolder> GetThemeNotes(bool scentence, float max_phrase_length, List<MidiHolder> chords)
-    //{
-    //    List<MidiHolder> melody = new List<MidiHolder>();
-
-    //    List<MidiHolder> basic_motif = GetBasicMelody(max_phrase_length);
-    //    List<MidiHolder> answer = GetBasicMelody(max_phrase_length);
-    //    List<MidiHolder> answer_2 = GetBasicMelody(max_phrase_length);
-
-    //    answer_2[answer_2.Count - 1].pitch[0] = GetRootNote() + 36;
-
-    //    foreach(MidiHolder mh in basic_motif)
-    //    {
-    //        melody.Add(mh);
-    //    }
-
-    //    foreach (MidiHolder mh in answer)
-    //    {
-    //        melody.Add(mh);
-    //    }
-
-    //    foreach (MidiHolder mh in basic_motif)
-    //    {
-    //        melody.Add(mh);
-    //    }
-
-    //    foreach (MidiHolder mh in answer_2)
-    //    {
-    //        melody.Add(mh);
-    //    }
-
-
-    //    return melody;
-    //}
 
     // Update is called once; per frame
-
     public MidiHolder GetNote(MidiHolder note, int song_number)
     {
         return reader_script.GetNote(freq, note, song_number);
