@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -53,6 +54,7 @@ public class GameController : MonoBehaviour
     public float min_distnce_for_enemies = 5.0f;
     [Space]
     int score = 0;
+    
 
     [Header("Valence")]
     public float valence = 0.0f;
@@ -237,7 +239,7 @@ public class GameController : MonoBehaviour
 
     public void EndGame()
     {
-        //Spoilers
+        
     }
 
     void LockDown()
@@ -297,6 +299,9 @@ public class GameController : MonoBehaviour
 
         intensity = RoundToDecimanl(intensity, 0.01f, true);
         valence = RoundToDecimanl(valence, 0.01f, true);
+
+        intensity = Mathf.Clamp(intensity, -1.0f, 1.0f);
+        valence = Mathf.Clamp(valence, -1.0f, 1.0f);
 
         data_point.rectTransform.localPosition = new Vector2(data_point_scale * valence, data_point_scale * intensity);
 

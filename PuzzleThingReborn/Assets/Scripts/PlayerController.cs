@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public enum Movement_State{ STILL, WALK, RUN };
 
@@ -224,9 +225,9 @@ public class PlayerController : MonoBehaviour
             lives_text.text = lives.ToString();
             StartCoroutine(Death());
 
-            
-             GameController.instance.PlayerDead(lives);
-            
+
+            GameController.instance.PlayerDead(lives);
+
         }
     }
 
@@ -249,6 +250,13 @@ public class PlayerController : MonoBehaviour
             t += black_screen_speed * Time.deltaTime;
 
             yield return null;
+        }
+
+        if(lives<= 0)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.Confined;
+            SceneManager.LoadScene("Menu");
         }
 
 

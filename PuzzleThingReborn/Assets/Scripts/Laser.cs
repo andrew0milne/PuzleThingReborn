@@ -21,7 +21,7 @@ public class Laser : MonoBehaviour
     public float activate_time = 5.0f;
     public Collider stop;
 
-    bool always_on = false;
+    public bool always_on = false;
 
     AudioSource audio;
     public bool play_sound = false;
@@ -54,10 +54,17 @@ public class Laser : MonoBehaviour
 
         temp_beam = new Vector3[line.positionCount];
 
-        line.enabled = false;
-        stop.enabled = false;
-        ps.Stop();
-
+        if(always_on)
+        {
+            StartCoroutine(LaserOn());
+        }
+        else
+        {
+            line.enabled = false;
+            stop.enabled = false;
+            ps.Stop();
+        }
+        
         //Activate(active);
     }
 

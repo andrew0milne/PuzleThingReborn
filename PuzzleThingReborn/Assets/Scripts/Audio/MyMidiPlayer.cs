@@ -184,6 +184,8 @@ public class MyMidiPlayer : MonoBehaviour
     {
         int offset = markov_offset * 12;
 
+
+
         if (note.pitch[0] != -1)
         {
             MidiHolder temp_note = ScriptableObject.CreateInstance<MidiHolder>();

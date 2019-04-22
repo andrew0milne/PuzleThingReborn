@@ -33,7 +33,9 @@ public class MusicController : MonoBehaviour
     [Tooltip("Controls variables such as the scale and root note (Basically how happy the music is)")]
     [Range(-1.0f, 1.0f)]
     public float valence = 0.0f;
-  
+
+    [Space]
+    public float markov_intensity_weighting = 0.7f;
 
     [Header("BPM")]
     [Range(50.0f, 300.0f)]

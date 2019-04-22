@@ -45,6 +45,7 @@ public class NextNote: ScriptableObject
 {
     public MidiHolder note;
     public int freq;
+ 
 
     public void Print()
     {
@@ -114,13 +115,31 @@ public class DependHolder : ScriptableObject
         return false;      
     }
 
+    // Sums the various frequencies in the next_note list, and sort them by their length in ascending order
     public void SumFreq()
-    {
-        foreach(NextNote nn in next_note)
+    {      
+        foreach (NextNote nn in next_note)
         {
             max_freq += nn.freq;
         }
+
+        
+
+        for (int max = 1; max < next_note.Count - 1; max++)
+        {
+            for (int i = 0; i < next_note.Count - max; i++)
+            {
+                if (next_note[i].note.length > next_note[i + 1].note.length)
+                {
+                    NextNote temp = next_note[i + 1];
+                    next_note[i + 1] = next_note[i];
+                    next_note[i] = temp;
+                }
+            }
+        }
     }
+
+   
 
     public void Print()
     {
@@ -604,6 +623,10 @@ public class MidiReader : MonoBehaviour
 
         bool check_length = true;
 
+        float intensity = MusicController.instance.intensity;
+        float weighting = MusicController.instance.markov_intensity_weighting;
+        float random_weight = 0.0f;
+
         for (int i = 0; i < 2; i++)
         {
             foreach (DependHolder dh in freq)
@@ -612,9 +635,15 @@ public class MidiReader : MonoBehaviour
                 //print(dh.note.pitch[0] + ", " + dh.note.length + ", " + dh.note.pitch.Count);
 
                 if (CheckNotes(previous_note, dh.note, check_length, false))
-                {                
+                {
+                    random_weight = -intensity * weighting * dh.max_freq;
 
-                    float random = Random.Range(0, (float)dh.max_freq);
+                    float range_lower = Mathf.Clamp(random_weight, 0, dh.max_freq);
+                    float range_upper = Mathf.Clamp(dh.max_freq + random_weight, 0, dh.max_freq);
+
+                    
+
+                    float weighted_random = Random.Range(range_lower, range_upper);
                     int p = 0;
 
                     //print(dh.next_note.Count);
@@ -622,9 +651,9 @@ public class MidiReader : MonoBehaviour
                     {
                         p += nn.freq;                    
 
-                        //Debug.Log(p + " >= " + random + "?");
+                        //Debug.Log(p + " >= " + weighted_random + "?     (" + random_weight + ")");
 
-                        if (p >= random)
+                        if (p >= weighted_random)
                         {
                             //Debug.Log("yes");
 
@@ -634,6 +663,7 @@ public class MidiReader : MonoBehaviour
 
                             //print(dh.note.pitch[0] + ", " + dh.note.length + " --> " + new_note.pitch[0] + ", " + new_note.length);
 
+                           
                             return new_note;
                         }
                         //Debug.Log("no");

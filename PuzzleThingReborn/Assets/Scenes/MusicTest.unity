@@ -371,6 +371,11 @@ Prefab:
       propertyPath: midi_reader
       value: 
       objectReference: {fileID: 1869720424}
+    - target: {fileID: 114710459967444098, guid: 75b9e726b17b19d41bd6e5a31a477b1c,
+        type: 2}
+      propertyPath: markov_intensity_weighting
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 75b9e726b17b19d41bd6e5a31a477b1c, type: 2}
   m_IsPrefabParent: 0
@@ -603,6 +608,16 @@ Prefab:
       propertyPath: controller
       value: 
       objectReference: {fileID: 890863030}
+    - target: {fileID: 114263781872763180, guid: a3ed4a53ef5070044a5dd23595f0ad5f,
+        type: 2}
+      propertyPath: midi_files.Array.data[0].name
+      value: king3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114263781872763180, guid: a3ed4a53ef5070044a5dd23595f0ad5f,
+        type: 2}
+      propertyPath: midi_files.Array.data[0].channel
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a3ed4a53ef5070044a5dd23595f0ad5f, type: 2}
   m_IsPrefabParent: 0
