@@ -12,9 +12,12 @@ public class EnemyController : MonoBehaviour
     public GameObject enemy;
     public GameObject enemy_parent;
 
+    Vector3 start_pos;
+
     Transform target;
 
-    public List<Vector3> patrol_positions;
+    public Transform route;
+    List<Vector3> patrol_positions;
     int current_position;
 
     NavMeshAgent agent;
@@ -44,23 +47,32 @@ public class EnemyController : MonoBehaviour
 
         Transform[] children = GetComponentsInChildren<Transform>();
 
+        Transform[] r = route.GetComponentsInChildren<Transform>();
+
         foreach(Transform t in children)
-        {
-            if(t.tag == "Route")
-            {
-                patrol_positions.Add(t.position);
-                //Destroy(t.gameObject);
-            }
-            else if(t.tag == "Enemy")
+        {          
+            if(t.tag == "Enemy")
             {
                 enemy = t.gameObject;
             }
             else if(t.tag == "EnemyParent")
             {
                 enemy_parent = t.gameObject;
-            }
-           
+            }         
         }
+
+        start_pos = transform.position;
+
+        patrol_positions = new List<Vector3>();
+
+        foreach (Transform t in r)
+        {
+            if (t.tag == "Route")
+            {
+                patrol_positions.Add(t.position);
+            }
+        }
+
 
         agent = enemy.GetComponent<NavMeshAgent>();
 
@@ -197,6 +209,11 @@ public class EnemyController : MonoBehaviour
     public void StartHunting()
     {
         current_state = State.HUNT;
+    }
+
+    public void ResetPosition()
+    {
+        transform.position = start_pos;
     }
 
 	// Update is called once per frame

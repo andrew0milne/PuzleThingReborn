@@ -39,6 +39,7 @@ public class MyMidiPlayer : MonoBehaviour
 
     public int markov_offset = 0;
     public int chord_offset = 0;
+    public float length_scaler = 1.0f;
 
     float markov_beat_counter = 0.0f;
     float chord_beat_counter = 0.0f;
@@ -52,10 +53,8 @@ public class MyMidiPlayer : MonoBehaviour
 
     public bool round_notes = true;
 
-    //List<MidiHolder> melody;
-    //int melody_counter = 0;
-
     public bool structured = true;
+    public float structured_toggle_point = 0.8f;
 
     // Use this for initialization
     void Start()
@@ -89,7 +88,19 @@ public class MyMidiPlayer : MonoBehaviour
         {
             Theme temp_theme = ScriptableObject.CreateInstance<Theme>();
 
-            temp_theme.theme = MusicController.instance.GetTheme(true, 4, 1.0f, 2.0f, 4.0f, i);
+            int num = Random.Range(0, 2);
+            bool structure;
+
+            if(num == 0)
+            {
+                structure = true;
+            }
+            else
+            {
+                structure = false;
+            }
+
+            temp_theme.theme = MusicController.instance.GetTheme(structure, 4, 1.0f, 2.0f, 4.0f, i);
 
             Debug.Log("Theme " + i + ": " + temp_theme.theme.Length);
 
@@ -184,8 +195,6 @@ public class MyMidiPlayer : MonoBehaviour
     {
         int offset = markov_offset * 12;
 
-
-
         if (note.pitch[0] != -1)
         {
             MidiHolder temp_note = ScriptableObject.CreateInstance<MidiHolder>();
@@ -253,37 +262,6 @@ public class MyMidiPlayer : MonoBehaviour
     {
         if (AudioSettings.dspTime >= nextTick) //&& chords)
         {
-
-            /*///if (AudioSettings.dspTime >= nextTickChords && chords)
-            if (chord_beat_counter >= theme[0][chord_num].length && chords)
-            {
-                chord_num = theme_counter[0] - 1;
-                if (chord_num < 0)
-                {
-                    chord_num = theme[0].Count - 1;
-                }
-
-                GetChord(theme[0][chord_num]);
-
-                chord_beat_counter = 0.0f;
-
-                //nextTickChords += (60.0f / (MusicController.instance.bpm / theme[0][theme_counter[0]].length));
-
-                //
-
-
-
-                theme_counter[0]++;
-                if (theme_counter[0] >= theme[0].Count)
-                {
-                    theme_counter[0] = 0;
-                }
-            }
-
-            // 
-            /chord_beat_counter += MusicController.instance.shortest_note_length;*/
-
-
             if (structured)
             {
                 if (markov_beat_counter >= themes[MusicController.instance.song_number].theme[1][theme_counter[1]].length && markov)
@@ -308,13 +286,11 @@ public class MyMidiPlayer : MonoBehaviour
             }
             else
             {
-                if (markov_beat_counter >= note.length && markov)
+                if (markov_beat_counter >= (note.length) && markov)
                 {
                     markov_beat_counter = 0.0f;
 
                     note = MusicController.instance.GetNote(note, MusicController.instance.song_number);
-
-                    //print(note.pitch[0]);
 
                     StartCoroutine(PlayNote(note, MusicController.instance.song_number));           
                 }
@@ -325,8 +301,6 @@ public class MyMidiPlayer : MonoBehaviour
 
             UpdateBeat();
         }
-
-
     }
 
     // Update is called once per frame
@@ -335,6 +309,15 @@ public class MyMidiPlayer : MonoBehaviour
         if (playing)
         {
             PlayScale();
+
+            if(MusicController.instance.intensity < structured_toggle_point && structured == false)
+            {
+                structured = true;
+            }
+            else if(structured == true)
+            {
+                structured = false;
+            }
         }
     }
 }

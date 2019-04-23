@@ -20,6 +20,9 @@ public class GameController : MonoBehaviour
 
     int max_pickups = 0;
 
+    public Image black_screen;
+    public float flash_speed = 2.0f;
+
     public Text prog_text;
     public Text speed_text;
     public Text prox_text;
@@ -91,6 +94,10 @@ public class GameController : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        black_screen.color = Color.black;
+
+        StartCoroutine(ScreenFlashToColour(flash_speed, Color.black, false, false));
+
         Transform[] temp = pickUps.GetComponentsInChildren<Transform>();
 
         max_pickups = temp.Length - 1;
@@ -103,6 +110,50 @@ public class GameController : MonoBehaviour
         Debug.Log("Hunting at " + max_pickups * hunting_start);
 
         max_lives = player.GetComponent<PlayerController>().max_lives;
+    }
+
+    // Turns the screen a solid colour, if dir is false, does opposite
+    IEnumerator ScreenFlashToColour(float speed, Color flash_color, bool dir, bool dead)
+    {
+        float t = 0.0f;
+
+        Color transparent = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        Color color1;
+        Color color2;
+
+        if(dir)
+        {
+            color1 = transparent;
+            color2 = flash_color;
+        }
+        else
+        {
+            color2 = transparent;
+            color1 = flash_color;
+        }
+
+        // Screen flash to black
+        while (t < 1.1f)
+        {
+            black_screen.color = Color.Lerp(color1, color2, t);
+            t += speed * Time.deltaTime;
+
+            yield return null;
+        }
+
+        black_screen.color = color2;
+
+        if(dead)
+        {
+            
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.Confined;
+            SceneManager.LoadScene("Menu");
+            
+        }
+
+        yield return null;
     }
 
     void UpdateGameVariables()
@@ -182,6 +233,8 @@ public class GameController : MonoBehaviour
     {
         score = num;
 
+        print(score + ", " + max_pickups);
+
         if(score >= max_pickups * lockdown_start && !LOCKDOWN)
         {
             LockDown();
@@ -189,6 +242,12 @@ public class GameController : MonoBehaviour
         else if(score >= max_pickups * hunting_start && !HUNTING)
         {
             StartHunting();
+        }
+
+        if (score >= max_pickups)
+        {
+            print("hello");
+            EndGame();
         }
     }
 
@@ -235,11 +294,16 @@ public class GameController : MonoBehaviour
         {
             EndGame();
         }
+
+        foreach(GameObject g in enemies)
+        {
+            g.GetComponent<EnemyController>().ResetPosition();
+        }
     }
 
     public void EndGame()
     {
-        
+        StartCoroutine(ScreenFlashToColour(2.0f, Color.black, true, true));
     }
 
     void LockDown()

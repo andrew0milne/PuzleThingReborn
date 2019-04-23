@@ -35,7 +35,8 @@ public class MusicController : MonoBehaviour
     public float valence = 0.0f;
 
     [Space]
-    public float markov_intensity_weighting = 0.7f;
+    public float markov_intensity_lower_weighting = 0.7f;
+    public float markov_intensity_upper_weighting = 0.7f;
 
     [Header("BPM")]
     [Range(50.0f, 300.0f)]
@@ -43,6 +44,7 @@ public class MusicController : MonoBehaviour
     public bool change_bpm = true;
     public float min_bpm = 80.0f;
     public float max_bpm = 150.0f;
+
 
     [Header("Scales")]
     public ScaleNote scale_note;
@@ -165,7 +167,7 @@ public class MusicController : MonoBehaviour
 
         Debug.Log("1");
 
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(5.0f);
 
         double start_tick = AudioSettings.dspTime + (60.0f / (bpm / 2.0f));
 
@@ -618,66 +620,128 @@ public class MusicController : MonoBehaviour
         //answer_melo = AlterMelodyToChords(answer_melo, answer_chords);
         //answer_2_melo = AlterMelodyToChords(answer_2_melo, answer_2_chords);
 
-
-
-        // Add basic Motif
-        foreach (MidiHolder c in basic_motif_chords)
+        if (scentence)
         {
-            scale_progression[0].Add(c);
+            // Add basic Motif
+            foreach (MidiHolder c in basic_motif_chords)
+            {
+                scale_progression[0].Add(c);
 
-        }
+            }
 
-        // Add anser to basic motif
-        foreach (MidiHolder c in answer_chords)
-        {
-            scale_progression[0].Add(c);
+            
+            // Add basic motif again
+            foreach (MidiHolder c in basic_motif_chords)
+            {
+                scale_progression[0].Add(c);
 
-        }
+            }
 
-        // Add basic motif again
-        foreach (MidiHolder c in basic_motif_chords)
-        {
-            scale_progression[0].Add(c);
+            // Add anser to basic motif
+            foreach (MidiHolder c in answer_chords)
+            {
+                scale_progression[0].Add(c);
 
-        }
+            }
 
-        // Add end
-        foreach (MidiHolder c in answer_2_chords)
-        {
-            scale_progression[0].Add(c);
+            // Add end
+            foreach (MidiHolder c in answer_2_chords)
+            {
+                scale_progression[0].Add(c);
 
-        }
+            }
 
 
+            // Add basic Motif
+            foreach (MidiHolder c in basic_motif_melo)
+            {
+                scale_progression[1].Add(c);
 
-        // Add basic Motif
-        foreach (MidiHolder c in basic_motif_melo)
-        {
-            scale_progression[1].Add(c);
-           
-        }
+            }
         
-        // Add anser to basic motif
-        foreach (MidiHolder c in answer_melo)
-        {
-            scale_progression[1].Add(c);
-            
+            // Add basic motif again
+            foreach (MidiHolder c in basic_motif_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
+
+            // Add anser to basic motif
+            foreach (MidiHolder c in answer_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
+
+            // Add end
+            foreach (MidiHolder c in answer_2_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
         }
-       
-        // Add basic motif again
-        foreach (MidiHolder c in basic_motif_melo)
+        else
         {
-            scale_progression[1].Add(c);
-           
+
+
+            // Add basic Motif
+            foreach (MidiHolder c in basic_motif_chords)
+            {
+                scale_progression[0].Add(c);
+
+            }
+
+            // Add anser to basic motif
+            foreach (MidiHolder c in answer_chords)
+            {
+                scale_progression[0].Add(c);
+
+            }
+
+            // Add basic motif again
+            foreach (MidiHolder c in basic_motif_chords)
+            {
+                scale_progression[0].Add(c);
+
+            }
+
+            // Add end
+            foreach (MidiHolder c in answer_2_chords)
+            {
+                scale_progression[0].Add(c);
+
+            }
+
+
+
+            // Add basic Motif
+            foreach (MidiHolder c in basic_motif_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
+
+            // Add anser to basic motif
+            foreach (MidiHolder c in answer_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
+
+            // Add basic motif again
+            foreach (MidiHolder c in basic_motif_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
+
+            // Add end
+            foreach (MidiHolder c in answer_2_melo)
+            {
+                scale_progression[1].Add(c);
+
+            }
         }
-       
-        // Add end
-        foreach (MidiHolder c in answer_2_melo)
-        {
-            scale_progression[1].Add(c);
-            
-        }
-       
         return scale_progression;
     }
 
@@ -697,8 +761,7 @@ public class MusicController : MonoBehaviour
 
         float intensity_lerp = (intensity + 1) / 2.0f;
 
-        bpm = Mathf.Lerp(min_bpm, max_bpm, intensity_lerp);
-
+        bpm = Mathf.Lerp(min_bpm, max_bpm, intensity_lerp);     
     }
 
     void Update ()

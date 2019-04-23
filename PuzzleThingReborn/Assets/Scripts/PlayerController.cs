@@ -175,7 +175,7 @@ public class PlayerController : MonoBehaviour
         {
             // Movement
             forward_speed = Input.GetAxis("Vertical") * movement_speed * Time.deltaTime;
-            side_speed = Input.GetAxis("Horizontal") * movement_speed * Time.deltaTime;
+            side_speed = Input.GetAxis("Horizontal") * (movement_speed / 2.0f) * Time.deltaTime;
 
             if (forward_speed == 0.0f && side_speed == 0.0f)
             {
@@ -205,6 +205,9 @@ public class PlayerController : MonoBehaviour
 
 
         speed = new Vector3(side_speed, 0.0f, forward_speed);
+
+        
+        
         transform.Translate(speed);
 
         direction = transform.position - old_pos;
@@ -235,7 +238,7 @@ public class PlayerController : MonoBehaviour
     {
         float t = 0.0f;
 
-        GameController.instance.PlayerDead(lives);
+        
 
         Debug.Log("in death");
 
@@ -252,12 +255,9 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
-        if(lives<= 0)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.Confined;
-            SceneManager.LoadScene("Menu");
-        }
+        GameController.instance.PlayerDead(lives);
+
+        
 
 
         // Moe and rotate the player

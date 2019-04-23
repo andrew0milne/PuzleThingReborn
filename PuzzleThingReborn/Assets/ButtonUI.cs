@@ -8,8 +8,7 @@ public class ButtonUI : MonoBehaviour
 
     private void Start()
     {
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.Confined;
+        
     }
 
     public void Play()

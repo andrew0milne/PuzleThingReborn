@@ -245,7 +245,7 @@ public class MidiReader : MonoBehaviour
         for (int j = 0; j < midi_files.Length; j++)
         {
             // Gets the MIDI file
-            midi_file = new MidiFile(Application.dataPath + "/Audio/Midi Files/" + midi_files[j].name + ".mid");
+            midi_file = new MidiFile(Application.streamingAssetsPath + "/Audio/" + midi_files[j].name + ".mid");
 
             MidiEventCollection midi_events = midi_file.Events;
 
@@ -624,8 +624,10 @@ public class MidiReader : MonoBehaviour
         bool check_length = true;
 
         float intensity = MusicController.instance.intensity;
-        float weighting = MusicController.instance.markov_intensity_weighting;
-        float random_weight = 0.0f;
+        float lower_weighting = MusicController.instance.markov_intensity_lower_weighting;
+        float upper_weighting = MusicController.instance.markov_intensity_upper_weighting;
+        float random_lower_weight = 0.0f;
+        float random_upper_weight = 0.0f;
 
         for (int i = 0; i < 2; i++)
         {
@@ -636,10 +638,11 @@ public class MidiReader : MonoBehaviour
 
                 if (CheckNotes(previous_note, dh.note, check_length, false))
                 {
-                    random_weight = -intensity * weighting * dh.max_freq;
+                    random_lower_weight = -intensity * lower_weighting * dh.max_freq;
+                    random_upper_weight = -intensity * upper_weighting * dh.max_freq;
 
-                    float range_lower = Mathf.Clamp(random_weight, 0, dh.max_freq);
-                    float range_upper = Mathf.Clamp(dh.max_freq + random_weight, 0, dh.max_freq);
+                    float range_lower = Mathf.Clamp(random_lower_weight, 0, dh.max_freq);
+                    float range_upper = Mathf.Clamp(dh.max_freq + random_upper_weight, 0, dh.max_freq);
 
                     
 
